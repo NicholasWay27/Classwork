@@ -1,0 +1,104 @@
+---
+title: "Homework 5"
+author: "Nicholas Way"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+Minneapolis2013 <- read.table("C:/Users/nicho/OneDrive/Documents/Stat 184/Homeworks/HW 5/Minneapolis2013 (1).txt", header = TRUE)
+```
+
+##Section 2
+
+```{r}
+Minneapolis2013 %>%
+  select(First) %>%
+  n_distinct()
+```
+
+```{r}
+Minneapolis2013 %>%
+  filter(First == "BETSY HODGES") %>%
+  nrow()
+```
+
+```{r}
+Subset <- Minneapolis2013 %>%
+  select(Precinct, First, Ward)
+head(Subset, 3)
+```
+
+```{r}
+Minneapolis2013 %>%
+  count(Second, sort = TRUE) %>%
+  head(5)
+```
+
+```{r}
+Minneapolis2013 %>%
+  filter(First == "undervote") %>%
+  nrow()
+```
+
+```{r}
+Minneapolis2013 %>%
+  count(First, Second, sort = TRUE) %>%
+  head(3)
+```
+
+```{r}
+Minneapolis2013 %>% 
+  count(Precinct, sort = TRUE) %>%
+  head(1)
+```
+
+```{r}
+Minneapolis2013 %>%
+  filter(First == Second) %>%
+  nrow()
+```
+
+```{r}
+Minneapolis2013 %>%
+  filter(First == Second) %>%
+  count(First, sort = TRUE) %>%
+  head(3)
+```
+
+```{r}
+Minneapolis2013 %>%
+  filter(First == "OLE SAVIOR") %>%
+  count(Second, sort = TRUE) %>%
+  head(3)
+```
+
+```{r}
+Minneapolis2013 %>%
+  count(First, sort = TRUE) %>%
+  mutate(First = ifelse(n < 5000, "minor", First))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,135 @@
+---
+title: "Stat 184 Homework"
+author: "Nicholas Way"
+output: html_notebook
+---
+
+```{r}
+library(mosaicData)
+library(tidyverse)
+library(ggplot2)
+```
+
+
+##Section 2
+
+6.1: 
+1. Suspension growth and adhesion growth
+
+2. The frames are the same for each facet
+
+3. The red line, the black bars at each interval, and the black stars.
+
+6.2:
+1. The guides are flux, which is marked by an open or filled circle. Gene, which is on the x axis and labels each gene on the plot. Molecule, which is determined by color for each point. Target, which groups the x axis into three different parts. As well as concentration, which is the y axis from -3 to 5.
+
+2. The dots are all the same color, but they are mapped by color, openness, target, and concentration. Color does not affect any variable. Openness does not affect any variable. Target affects what part of the x axis they are on, and concentration affects where they are on the y axis.
+
+3. Concentration and Gene set the frame
+
+4. Gene and Target
+
+6.3:
+1.Each point is plotted as a dot, with a line through it that represents the high and low. The colors are blue or red and are dependent on polarity. The stars represent the amount of significant numbers.
+
+2. There is only one variable, which is cell density on the y axis. The points are put in order going from the highest to the lowest cell density.
+
+3. Yes color is an attribute.
+
+4. There is a color key and y axis tick marks as well as a line at y=0
+
+
+##Section 3
+
+8.1:
+
+```{r}
+data("CPS85")
+```
+
+geom_point : Add a layer of glyphs
+
+geom_histogram : Add a layer of glyphs
+
+geom_segment : Add a layer of glyphs
+
+ggplot : Construct a graphics frame
+
+facet_wrap : Divide the frame into facets
+
+facet_grid : Divide the frame into facets
+
+ylab : Set an axis label
+
+xlim : Change the scale for the frame
+
+scale_y_log10 : Change the scale for the frame
+
+
+8.2:
+
+a.
+```{r}
+CPS85 %>%
+  ggplot(aes(x=wage)) +
+  geom_density(aes(fill=sex)) +
+  facet_wrap(married~.) +
+  xlim(0,30)
+```
+
+b.
+```{r}
+CPS85 %>%
+  ggplot(aes(x=age, y=wage, color = sex)) +
+  facet_grid(married~.) +
+  geom_smooth(method = 'loess')
+  xlim(20,60) +
+  ylim(0,15)
+```
+
+c.
+```{r}
+CPS85 %>%
+  ggplot(aes(x=age, y=wage, color = sex)) +
+    geom_smooth(method = 'loess') +
+  facet_wrap(sector~.) +
+  xlim(20,60) +
+  ylim(0,25)
+```
+
+8.3: 
+
+a.
+```{r}
+CPS85 %>%
+  ggplot(aes(x=age, y=wage)) +
+  geom_point()
+```
+
+b.
+```{r}
+CPS85 %>%
+  ggplot(aes(x=age, y=wage)) +
+  geom_point(aes(shape=sex))
+```
+
+c.
+```{r}
+CPS85 %>%
+  ggplot(aes(x=age, y=wage)) +
+  geom_point(aes(shape=sex)) +
+  facet_grid(married ~ .)
+```
+
+d.
+```{r}
+CPS85 %>%
+  ggplot(aes(x=age, y=wage)) +
+  geom_point(aes(shape=married)) +
+  ylim(0,30)
+```
+
+
+
+
+

@@ -1,0 +1,102 @@
+---
+title: "Homework 9"
+author: "Nicholas Way"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r}
+rm(list = ls())
+
+data(iris)
+```
+
+# 1.a
+
+```{r}
+ mycor <- function(x, y) {
+  mean_x <- mean(x)
+  mean_y <- mean(y)
+  numerator <- sum((x - mean_x) * (y - mean_y))
+  denominator <- sqrt(sum((x - mean_x)^2) * sum((y - mean_y)^2))
+  return(numerator/denominator)
+}
+```
+
+```{r}
+x <- iris$Sepal.Length
+y <- iris$Sepal.Width
+
+mycor(x, y)
+
+cor(x, y)
+```
+
+# 1.b
+
+```{r}
+mycormat <- function(X) {
+  p <- ncol(X)
+  cor_mat <- matrix(0, p, p)
+  for (i in 1:p) {
+    for (j in 1:p) {
+      cor_mat[i, j] <- mycor(X[,i], X[,j])
+    }
+  }
+  rownames(cor_mat) <- colnames(cor_mat) <- names(X)
+  return(cor_mat)
+}
+```
+
+
+```{r}
+mycormat(X = iris[,1:4])
+
+cor(iris[,1:4])
+```
+
+# 2.a
+
+```{r}
+rootsReal <- function(a, b, c) {
+  discriminant <- b^2 - 4*a*c
+  return(discriminant >= 0)
+}
+```
+
+# 2.b
+
+```{r}
+print(rootsReal(1, 0, -4))
+```
+
+# 2.c
+
+```{r}
+solve_quadratic <- function(a, b, c) {
+  discriminant <- b^2 - 4*a*c
+  if (discriminant >= 0) {
+    root1 <- (-b + sqrt(discriminant)) / (2*a)
+    root2 <- (-b - sqrt(discriminant)) / (2*a)
+    return(c(root1, root2))
+  } else {
+    print("Roots not real")
+  }
+}
+```
+
+# 2.d
+
+```{r}
+print(solve_quadratic(1, 0, -4))  
+print(solve_quadratic(1, 0, 4))   
+```
+
+
+
+
+
+
+
+

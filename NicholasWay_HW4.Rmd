@@ -1,0 +1,103 @@
+---
+title: "Homework 4"
+author: "Nicholas Way"
+output:
+  html_document:
+    df_print: paged
+---
+
+##Section 1
+a.
+Data Tables - tidy data with one or more variables
+
+Arguments - describe the details of what a function is to do
+
+Functions - objects that transform an input to an output; always followed
+immediately by an open parenthesis (a few exceptions)
+
+Constants - single values, most commonly a number or character string
+
+Variables - columns in a data table
+
+b. 
+== - special type of function used to evaluate equality
+
+%>% - chaining operator
+
+<- - assignment operator
+
+c. 
+False - summarise() is a reduction function
+
+True - group_by() should always be followed by another data verb
+
+False - When there is missing data (NA), reduction functions will automatically remove missing data by default and execute the proper calculation with the remaining data
+
+True - ifelse() allows you to translate each value in a variable to one of two values, depending on the result of a comparison
+
+##Section 2
+a. The date() function does not take any arguments
+
+b. The date() function results in an object of a character string of the current system date and time
+
+##Section 3
+
+a. Determine the 3rd largest. - Reduction
+
+b. Determine the 3rd and 4th largest values. - Neither
+
+c. Determine the number of cases. - Reduction
+
+d. Determine whether a year is a leap year. - Transformation
+
+e. Determine whether a date is a legal holiday. - Transformation
+
+f. Determine the range of a set, that is, the max minus the min. - Reduction
+
+g. Determine which day of the week (e.g., Sun, Mon, …) a given date is. - Transformation
+
+h. Find the time interval in days spanned by a set of dates. - Transformation
+
+##Section 4
+a. The group_by("First") should actually be group_by("name")
+
+b. Replace summarise(Tmp...) with summarise(BabyNames)
+
+c. The code needs the %>%, use n() instead of sum()
+
+##Section 5
+
+```{r}
+data("airquality")
+head(airquality)
+summary(airquality)
+```
+a. There are 6 different variables within the dataset "airquality". There are 153 cases within the dataset as well. I used two commands. head() to see the first couple of rows of the data, and summary() to just get the summary statistics for each variable within the set.
+
+```{r}
+mean(airquality$Temp)
+```
+b. I used the summarise function of mean(airquality$Temo) to find the mean temperature of 77.88235.
+
+c. 
+```{r}
+airquality %>%
+  group_by(Month) %>%
+  summarise(days = n_distinct(Day), temp = median(Temp), minWind = min(Wind), maxWind = max(Wind))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,100 @@
+---
+title: "HW 1"
+author: "Nicholas Way"
+date: "2023-01-24"
+output: html_document
+---
+#Section 1
+
+
+```{r}
+1+2*(3+4)
+```
+
+```{r}
+(4^3)+(3^2)
+```
+```{r}
+sqrt((4+3)+(2+1))
+```
+```{r}
+(((1+2)/(3+4)))^2
+```
+#Section 2
+
+```{r}
+rep("a", 4)
+```
+```{r}
+ seq(from=1, to=100, by=2)
+```
+```{r}
+rep(2:4, c(3,3,3))
+```
+```{r}
+rep(2:4, 2)
+```
+```{r}
+seq(from=0, to=1000, by=25 )
+```
+
+#Section 3
+
+```{r}
+x1 <- c(1.7, "a", FALSE)
+x2 <- c(TRUE, 2)
+```
+```{r}
+class(x1)
+```
+```{r}
+class(x2)
+```
+
+
+#Section 4
+
+1. "essay14" is a legitimate object name because it does not break any of the rules when it comes to naming objects.
+
+2. "first-essay" is not a legitimate object name because it breaks a rule by using the "-" symbol.
+
+3. ""MyData"" is not a legitimate object name because it contains the symbols "" which are not allowed.
+
+4. "small sample is not a legitimate object name because it contains a space in between the two words.
+
+5. ".myData" is a legitimate object name because it doesn't break any of the naming objects rules.
+
+6. "sqrt()" is not a legitimate object name because it contains the symbols "()".
+
+#Section 5
+
+```{r}
+bill <- c(46, 33, 39, 37, 46, 30, 48, 32, 49, 35, 30, 48)
+```
+
+```{r}
+bill[2:12]
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

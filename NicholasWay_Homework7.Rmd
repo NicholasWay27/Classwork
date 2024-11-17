@@ -1,0 +1,115 @@
+---
+title: "Homework 7"
+author: "Nicholas Way"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r}
+rm(list = ls())
+library(dplyr)
+```
+
+# DC Chapter 11
+
+11.1
+The join family of data verbs (inner_join(), left_join(), etc.) always have a data table as one of the arguments inside the parentheses because they are used to combine two or more tables based on common variables, and this requires the specification of the data tables to be joined. When joining tables, the variables used to match rows between tables must be specified, as well as the type of join to be performed. 
+
+
+11.2
+The information in the two tables cannot be successfully combined by laying the two tables side by side into a single table by simply copying the long and lat variables from one table and pasting them alongside the country, pop and area variables in the other table. This is because the two tables have different numbers of rows, and the rows are not necessarily in the same order. In this case, the common variable is the country name. However, the order of the rows in the two tables is different, and there may be countries in one table that are not present in the other table, and vice versa. Simply copying and pasting variables from one table to another will not properly match the variables from the two tables.
+
+
+11.5
+```{r}
+ZipGeography <- read.table("C:/Users/nicho/OneDrive/Documents/Stat 184/Homeworks/HW 7/ZipGeography.txt", header = T)
+```
+
+1.
+```{r}
+ ZipGeography %>% 
+  group_by(County) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count)) %>%
+  nrow()-1
+```
+There are 1909 different counties in the data.
+
+2.
+```{r}
+which.max(table(ZipGeography$CityName))
+```
+Washington is the most used city name.
+
+3.
+```{r}
+
+# calculate the total population for each state
+state_populations <- ZipGeography %>%
+  group_by(State) %>%
+  summarize(total_population = sum(Population))
+
+# join the state population data to the ZipGeography data
+zip_state_populations <- ZipGeography %>%
+  left_join(state_populations, by = "State")
+
+# calculate the percentage of each city's state population that it represents
+zip_state_populations <- zip_state_populations %>%
+  mutate(city_state_population_percent = (Population / total_population) * 100)
+
+# filter for cities where the percentage of their state population is greater than 5%
+cities_with_high_population_percent <- zip_state_populations %>%
+  filter(city_state_population_percent > 5)
+
+# count the number of states each of these cities appears in
+cities_by_state <- cities_with_high_population_percent %>%
+  group_by(CityName) %>%
+  summarize(n_states = n_distinct(State))
+
+# sort the cities by the number of states they appear in
+cities_by_state <- cities_by_state %>%
+  arrange(desc(n_states))
+
+# print the city name with the highest number of states it appears in
+cat("The city name that is used in the most states is:", cities_by_state$city[1])
+
+```
+
+4.
+```{r}
+state_timezones <- ZipGeography %>%
+  group_by(State) %>%
+  summarize(n_distinct_timezones = n_distinct(Timezone))
+
+
+states_with_multiple_timezones <- state_timezones %>%
+  filter(n_distinct_timezones > 1)
+```
+There are 40 states with multiple time zones
+
+5.
+```{r}
+city_timezones <- ZipGeography %>%
+  group_by(CityName) %>%
+  summarize(n_distinct_timezones = n_distinct(Timezone))
+
+
+cities_with_multiple_timezones <- city_timezones %>%
+  filter(n_distinct_timezones > 1)
+```
+There are 3042 cities with different timezones
+
+6.
+```{r}
+county_timezones <- ZipGeography %>%
+  group_by(County) %>%
+  summarize(n_distinct_timezones = n_distinct(Timezone))
+
+
+counties_with_multiple_timezones <- county_timezones %>%
+  filter(n_distinct_timezones > 1)
+```
+There are 385 counties with different timezones.
+
+

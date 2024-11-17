@@ -1,0 +1,117 @@
+---
+title: "Homework 3"
+author: "Nicholas Way"
+output:
+  html_document:
+    df_print: paged
+---
+##Problem 1
+```{r}
+Title <- c("Wall-E", "Happy Gilmore", "Grown Ups", "Batman v Superman", "Deadpool")
+Genre <- c("Science Fiction", "Comdey", "Comdey", "Superhero", "Comdey")
+Rating <- c("8.4", "7", "5.9", "6.4", "8")
+Year <- c("2008", "1996", "2010", "2016", "2016")
+```
+
+```{r}
+my_movie <- data.frame(Title, Genre, Rating, Year)
+```
+
+```{r}
+print(my_movie)
+```
+##Problem 2
+```{r}
+Recipe <- read.table("C:/Users/nicho/OneDrive/Documents/Stat 184/HW 3/data_hw3/data_hw3/recipe.txt", skip=2, sep = ";", header = TRUE)
+```
+
+```{r}
+print(Recipe)
+```
+
+
+
+
+##Problem 3
+```{r}
+pop <- read.csv("C:/Users/nicho/OneDrive/Documents/Stat 184/HW 3/data_hw3/data_hw3/world_pop.csv", skip = 4)
+```
+
+```{r}
+head(pop)
+```
+
+```{r}
+pop.meta. <- read.table("C:/Users/nicho/OneDrive/Documents/Stat 184/HW 3/data_hw3/data_hw3/world_pop_metadata.txt")
+```
+
+```{r}
+head(pop.meta.)
+```
+
+```{r}
+any(is.na(pop))
+any(is.na(pop.meta.))
+```
+
+There are a missing rows in pop.meta and in pop
+
+```{r}
+pop1 <- na.omit(pop)
+nrow(pop1)
+pop.meta1 <- na.omit(pop.meta.)
+nrow(pop.meta1)
+```
+
+216 cases remain in pop.meta1 and 262 cases remain in pop1
+
+```{r}
+pop1_not_in_pop.meta1 <- nrow(pop1) - nrow(pop1[pop1$Country.Code %in% pop.meta1$Country.Code, ])
+pop1_not_in_pop.meta1
+```
+
+There are 49 observations in pop1 that are not in pop.meta1
+
+```{r}
+pop.meta1_not_in_pop1 <- nrow(pop.meta1) - nrow(pop.meta1[pop.meta1$Country.Code %in% pop1$Country.Code, ])
+pop.meta1_not_in_pop1
+```
+
+There are 3 observations in pop.meta1 that are not in pop1
+
+```{r}
+pop2 <- pop1[pop1$Country.Code %in% pop.meta1$Country.Code, ]
+pop.meta2 <- pop.meta1[pop.meta1$Country.Code %in% pop1$Country.Code, ]
+```
+
+```{r}
+dim(pop2)
+dim(pop.meta2)
+```
+
+There are 213 rows in both pop2 and pop.meta2, but 65 columns in pop2 and 4 columns in pop.meta2
+
+```{r}
+all(pop2$Country.Code == pop.meta2$Country.Code)
+```
+
+They are now using the same cases
+
+```{r}
+indexes <- which(pop2$Country.Name %in% c("Brazil", "India", "Nigeria", "United States", "Spain"))
+```
+
+```{r}
+write.csv(pop2, "pop2.csv")
+write.csv(pop.meta2, "pop.meta2.csv")
+```
+
+
+
+
+
+
+
+
+
+

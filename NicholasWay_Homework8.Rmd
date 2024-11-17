@@ -1,0 +1,95 @@
+---
+title: "Homework 8"
+author: "Nicholas Way"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r}
+rm(list = ls())
+
+library(tidyr)
+library(tidyverse)
+
+BabyNames <- read.table("C:/Users/nicho/OneDrive/Documents/Stat 184/Homeworks/HW 8/BabyNames.txt", header = TRUE)
+```
+
+##12.1
+
+```{r}
+BothSexes <-
+  BabyNames %>%
+  pivot_wider(names_from = sex , values_from = count) %>%
+  filter(M > 5 | F > 5)
+```
+
+
+1. Sex
+
+2. 
+
+```{r}
+BothSexes %>%
+  mutate(genderbalance = abs(log(F/M))) %>%
+  arrange(genderbalance) %>%
+  head(10)
+```
+
+3. 
+
+```{r}
+BothSexes %>%
+  filter(M+F > 100) %>%
+  mutate(genderbalance = abs(log(F/M))) %>%
+  arrange(genderbalance) %>%
+  head(10)
+```
+
+##12.2
+
+1. 
+Version one: compare the name and the number of babies born a specific year and gender with that name
+Version two:  compare the number of people born with the name a specific year, based on gender
+Version three: compare the number of people born with the name of a specific gender, based on year
+
+2. 
+```{r}
+#version_two <- pivot_wider(version_one, names_from = sex, values_from = nbabies)
+```
+
+version two is wider because it has fewer rows by combining male and female cases.
+
+3.
+```{r}
+#version_one <- pivot_longer(version_three, cols = c(1912, 2012), names_to = "year", values_to = "nbabies")
+```
+
+version three is wider because it has fewer rows
+
+4. version two because each case differs by year and name, but every case includes male and female, making it easier to find the ratio.
+
+
+##12.3
+
+1.
+A vs C: A is wider because it has more columns and only two rows
+B vs C: B is wider because it has same number of columns and fewer rows
+A vs B: A is wider because it has more columns and only two rows
+
+2.
+I think table A makes it easier to compare the change in each country for each year because each case is first defined by the year.
+
+
+##12.4
+
+1.
+It has combined the "before" and "after" values into a single column, which makes it difficult to analyze the changes over time for each subject. The column "when" does not provide enough information to identify whether a particular value is from "before" or "after" measurement.
+
+2.
+To convert BP wide to a more useful narrow form, we can create separate columns for "before" and "after" values. 
+
+```{r}
+#BP_narrow <- BP_wide %>%
+#  pivot_longer(cols = c(before, after), names_to = "when", values_to = "value", names_sep = "_")
+```

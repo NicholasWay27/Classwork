@@ -1,0 +1,136 @@
+---
+title: "HW 2"
+author: "Nicholas Way"
+output:
+  html_document:
+    df_print: paged
+---
+
+
+#Section 1
+```{r}
+getwd()
+```
+
+
+#Section 2
+```{r}
+bill <- c(46, 33, 39, 37, 46, 30, 48, 32, 49, 35, 30, 48)
+```
+Total spent for the year
+```{r}
+sum(bill)
+```
+The minimum paid for a month
+```{r}
+min(bill)
+```
+the maximum paid for a month
+```{r}
+max(bill)
+```
+the differences between how much was paid each month
+```{r}
+diff(bill)
+```
+#Section 3
+
+```{r}
+list1 <- list(1:2, 1:4, c("A", "B", "C")); list1
+names(list1) <- c("a", "b", "c"); list1
+typeof(list1)  # check the type of my object list1
+```
+```{r}
+list1$a <- c(1:5)
+```
+```{r}
+print(list1)
+```
+
+```{r}
+list1[[2]][3] <- 16
+print(list1)
+```
+
+```{r}
+list1$c <- c("A", "B", "C", "d")
+print(list1)
+```
+```{r}
+names(list1)[1] <- "A"
+print(list1)
+```
+
+
+
+
+#Section 4
+
+```{r}
+data(iris)
+```
+
+```{r}
+str(iris)
+```
+```{r}
+head(iris, 5)
+```
+
+```{r}
+tail(iris, 5)
+```
+```{r}
+max(iris$Sepal.Length)
+```
+```{r}
+min(iris$Sepal.Length)
+```
+```{r}
+mean(iris$Sepal.Length)
+```
+```{r}
+sd(iris$Sepal.Length)
+```
+```{r}
+iris[130, "Petal.Length"]
+```
+```{r}
+iris[130, "Petal.Length"] <- 0 
+mean(iris$Petal.Length)
+```
+```{r}
+5.843333-3.719333
+```
+
+#Section 5
+
+```{r}
+x <- iris$Sepal.Length 
+y <- iris$Sepal.Width 
+x.bar <- mean(x) 
+y.bar <- mean(y)
+```
+
+```{r}
+ sum.xy <- sum((x - x.bar) * (y - y.bar))
+```
+
+```{r}
+sum.x <- sum((x - x.bar)^2)
+sum.y <- sum((y - y.bar)^2)
+```
+
+```{r}
+r <- sum.xy / sqrt(sum.x * sum.y)
+```
+
+```{r}
+cor(x, y)
+```
+It is the same value
+
+
+
+
+

@@ -1,0 +1,99 @@
+---
+title: "STAT 380 Activity 3"
+author: "Nicholas Way"
+date: "September 25, 2023"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## DUE DATE
+This activity is due by 11:59 PM (State College, PA time) on Monday, September 25, 2023. Since we took class time to work on this activity, you will only receive credit if you were in class or you notified me of your absence before class started. 
+
+## GOAL 
+The goal of this activity is to help you practice model building and comparing models.
+
+## DATA 
+The dataset L02_Insurance_m.csv contains information about a number of health insurance policies. In particular, the data set contains some attributes of the policy holder (such as age, sex, etc.) and the total charges billed by the health care provider. Details of the variables may be found in the Lecture 6 and Lecture 7 notes.
+
+## Front Matter
+```{r}
+rm(list = ls())
+library(tidyverse)
+#Add libraries as needed
+
+#Read in Dataset - Change path for location of file on YOUR computer
+Ins <- read.csv("C:/Users/nicho/OneDrive - The Pennsylvania State University/Stat 380/Lectures/L02_Insurance_m.csv")
+```
+
+
+## Tasks
+1. Complete Example 1 Part m of the Lecture 7 notes. The x's shown in the table below are placeholders and should be replaced with the values you have generated. 
+
+```{r}
+Ins <- 
+  Ins %>%
+  na.omit()
+```
+
+```{r}
+set.seed(321)
+train_ind <- sample(x = 1:nrow(Ins), size = floor(0.8*nrow(Ins)))
+set.seed(NULL)
+
+#Create Train and Validation sets
+train <- Ins[train_ind, ]
+validation <- Ins[-train_ind, ]
+```
+
+
+```{r}
+model1 <- lm(charges ~ age + bmi, data = train)
+summary(model1)
+
+model2 <- lm(charges ~ children + bmi, data = train)
+summary(model2)
+
+model3 <- lm(charges ~ age + children, data = train)
+summary(model3)
+```
+
+```{r}
+yhat1 <- predict(model1, newdata = validation)
+yhat2 <- predict(model2, newdata = validation)
+yhat3 <- predict(model3, newdata = validation)
+```
+
+```{r}
+MSE1 <- mean((validation$charges - yhat1))^2
+RMSE1 <- sqrt(mean((validation$charges - yhat1))^2)
+MSE1
+RMSE1
+
+MSE2 <- mean((validation$charges - yhat2))^2
+RMSE2 <- sqrt(mean((validation$charges - yhat2))^2)
+MSE2
+RMSE2
+
+MSE3 <- mean((validation$charges - yhat3))^2
+RMSE3 <- sqrt(mean((validation$charges - yhat3))^2)
+MSE3
+RMSE3
+```
+
+     - The first row of the table requires you to build a model with Age and BMI. In the second and third rows, you get to decide which variables and how many to include. 
+     - In order to knit this document, you will have to include code that reads in the dataset, handles any data processing. If you wish to avoid that, you may copy the table below into your notes and upload your notes document. Be sure to include an answer to Task 2 as well.
+
+|Predictor Variables in Model | $R^2$ | $R^2_{adj}$ | Validation Set MSE | Validation Set RMSE
+|:------------|:-----:|:-----:|:---------:|:---------:|
+|Age, BMI | .1092 | .1075  | 597158.1 | 772.7601 |
+| Children, BMI | .04553 | .04374 | 744893.2 | 863.0719 |
+| Age, Children | .08085 | .07913 | 1234200 | 1110.945 | 
+
+2. Of the models you built, which is the best based on validation set MSE (or validation set RMSE)? 
+
+Of the models I built, the best based on validation set RMSE is model1, which includes age and bmi as the predictor variables. It has the smallest RMSE of the three models with a value of 772.7601.
+
+3. Upon completing this activity, you should upload 2 items to Canvas: i.) your .Rmd file AND ii.) your .html file.

@@ -1,0 +1,87 @@
+---
+title: "Stat380_Activity2"
+author: "Nicholas Way"
+date: "2023-09-01"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Front Matter
+```{r}
+rm(list = ls())
+library(tidyverse)
+
+kc <- read.csv("C:/Users/nicho/OneDrive - The Pennsylvania State University/Stat 380/Lectures/kc1000v5.csv")
+```
+
+## Problem 1
+
+```{r}
+kc %>%
+  summarize(MedLivingSpace = median(liveSQ))
+
+kc %>%
+  filter(liveSQ < 1.89) %>%
+  summarize(MeanSale = mean(price),
+            sdSale = sd(price))
+```
+
+The median living space for houses in Seattle is 1,890 square feet. For
+houses with less than 1,890 square feet, the mean sale price is 379,270.3 dollars, while the standard deviation is 151,081.9 dollars.
+
+Mean: 379,270.3
+Standard Deviation: 151,081.9
+
+## Problem 2
+
+Research Question: How do prices of mansions compare to prices of smaller houses?
+
+```{r}
+kc <-
+  kc %>%
+  mutate(Mansion = ifelse(liveSQ > 3.5 | beds >= 6, "yes", "no"))
+```
+
+```{r}
+ggplot(data = kc, mapping = aes(x = Mansion, y = price)) +
+  geom_boxplot() +
+  labs(x = "Mansion Status",
+       y = "Price (in $)")
+```
+
+```{r}
+kc %>%
+  group_by(Mansion) %>%
+  summarize(Number_Of_Houses = n(),
+            Mean_Price = mean(price),
+            Standard_Deviation_Of_Price = sd(price))
+```
+
+After looking at the visualization and summary statistics, some inferences about house size and price can be made. It appears that mansions have a significantly higher price than houses that are smaller or not mansions, this is to be expected. The mean price for mansions is 1,207,955.9 while the mean price for houses that are not mansions is 486,462.8 meaning that there is a near 700 thousand dollar difference in the mean price between the two categories of house. Both the table and plot confirmed my expectations that as house size increases, so does the price of the house.
+
+## Problem 3
+
+Research Question: What are the most expensive zip codes in Seattle?
+
+```{r}
+topzip <-
+  kc %>%
+  group_by(zipcode) %>%
+  summarize(MedianPrice = median(price)) %>%
+  arrange(desc(MedianPrice))
+
+head(topzip, 5)
+```
+
+The most expensive zip codes in Seattle are 98039, 98004, 98109, 98040, and 98102.
+
+Most expensive: 98039
+Second most expensive: 98004
+Third most expensive: 98109
+Fourth most expensive: 98040
+Fifth most expensive: 98102
+
+

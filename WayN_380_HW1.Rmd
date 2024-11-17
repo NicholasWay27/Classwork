@@ -1,0 +1,122 @@
+---
+title: "HW1"
+author: "Nicholas Way"
+date: "2023-08-24"
+output: html_document
+---
+
+## Front Matter
+```{r}
+data(iris)
+library(tidyverse)
+```
+
+## Problem 1
+```{r}
+ggplot(data = iris, mapping = aes(x = Sepal.Length,))+
+  geom_histogram(binwidth = .25, color = "black", fill = "red")+
+  labs(x = "Sepal Length (in cm)",
+       y = "Number of Flowers",)
+```
+
+- The shape of the distribution of the number of flowers with varying sepal lengths is fairly symmetrical while being slightly skewed right.
+
+## Problem 2
+```{r}
+ggplot(data = iris, mapping = aes(x = Species)) +
+  geom_bar(fill = "white", color = "black") +
+  labs(x = "Species",
+       y = "Number of Flowers",)
+```
+
+- The distribution of the number of flowers for each species is completely identical. There is exactly 50 flowers within the data set for each of the three species.
+
+## Problem 3
+```{r}
+ggplot(data = iris, mapping = aes(x = Sepal.Length, y = Sepal.Width))+
+  geom_point(shape = 6)+
+  geom_smooth(method = lm, se = FALSE) +
+  labs(x = "Sepal Length (in cm)",
+       y = "Sepal Width (in cm)",)
+```
+
+- After analyzing the scatterplot with regression line, I have learned that there appears to be a very weak negative correlation between sepal length and sepal width, meaning that as the sepal length of a flower increases, it is expected that the sepal width decreases. This is not what I expected, I expected the variables to move in the same direction, meaning that as length increases, width increases.
+
+## Problem 4
+```{r}
+ggplot(data = iris, mapping = aes(x = Sepal.Length, y = Sepal.Width, color = as.factor(Species)))+
+  geom_point()+
+  geom_smooth(method = lm, se = FALSE) +
+  labs(x = "Sepal Length (in cm)",
+       y = "Sepal Width (in cm)",
+       color = "Species")
+```
+
+- After categorizing the relationship between length and width by species type, I have learned that the species versicolor and virginica both have a slightly positive correlation between their sepal length and width, while the species setosa has a much larger positively correlated relationship between their sepal length and width. It appears that no matter the species, as sepal length increases, so does sepal width. This is what I expected
+
+## Problem 5
+```{r}
+sp <- ggplot(data = iris, mapping = aes(x = Sepal.Length, y = Sepal.Width, color = as.factor(Species)))+
+  geom_point()+
+  geom_smooth(method = lm, se = FALSE) +
+  labs(x = "Sepal Length (in cm)",
+       y = "Sepal Width (in cm)",
+       color = "Species")
+
+sp2 <- sp + scale_color_manual(values=c("#E69F00", "#39FF14", "#00008B"))
+sp2
+```
+
+- Google Search : how to change the color scheme from the default colors to orange, green, and navy in r ggplot
+
+- Google Search : color code in r for dark blue
+
+- Link : http://www.sthda.com/english/wiki/ggplot2-colors-how-to-change-colors-automatically-and-manually
+
+## Problem 6
+```{r}
+sp2 + theme(legend.position = "bottom")
+```
+
+- Google Search : how to change the location of the legend in r ggplot
+
+- Link : https://r-graph-gallery.com/239-custom-layout-legend-ggplot2.html#:~:text=You%20can%20place%20the%20legend,the%20x%20and%20y%20coordinates.
+
+## Problem 7
+```{r}
+ggplot(data = iris, mapping = aes(x = Sepal.Length, y = Sepal.Width,))+
+  geom_point()+
+  geom_smooth(method = lm,) +
+  theme_bw() +
+  facet_grid(. ~ Species) +
+  labs(x = "Sepal Length (in cm)",
+       y = "Sepal Width (in cm)",)
+```
+
+- Google Search : how to remove gray background in r ggplot
+
+- Link : https://felixfan.github.io/ggplot2-remove-grid-background-margin/
+
+## Problem 8 
+```{r}
+ggplot(data = iris, mapping = aes(x = Species, y = Sepal.Width)) +
+  geom_boxplot() +
+  labs(x = "Species", 
+       y = "Sepal Width (in cm)") +
+  theme_bw()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

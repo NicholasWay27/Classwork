@@ -1,0 +1,54 @@
+---
+title: "Stat 380 Activity 1"
+author: "Nicholas Way"
+date: "2023-08-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+## New Plot
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+ggplot(
+  data = mtcars, 
+  mapping = aes(x = hp, y = mpg, color = as.factor(cyl))) +
+  geom_point() +
+   labs(
+    x = "Horsepower", y = "Miles per Gallon (MPG)",
+    color = "Cylinders")
+```
+
+Based on the graph above, I notice that there is a linear relationship between horsepower and mpg. I also notice that there seems to be a correlation between the number of cylinders and the horsepower of a car. It appears that as the number of cylinders increases, so does the horsepower. It seems that based on the graph, as the number of cylinders increases, the mpg decreases.
+
+## Concluding Thoughts
+
+I found it difficult trying to use ggplot originally because I had to remove and install some packages because of some errors. After refreshing myself on how to use gpplot and layers, it was pretty straight forward. I had to do some extra work to figure out the colors for the cylinders.
+

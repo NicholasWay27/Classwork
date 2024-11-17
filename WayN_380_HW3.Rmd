@@ -1,0 +1,189 @@
+---
+title: "STAT380_HW3"
+author: Nicholas Way
+output: html_document
+date: "Due: Thursday, September 14, 2023 by 11:59 PM"
+---
+
+## Instructions
+
+In class, we covered the basics of data wrangling using some of the basic `dplyr` verbs. The various joins that we have discussed are also from the `dplyr` package. The activities that follow are meant to provide further practice with these functions.
+
+In order to access the textbook, please see <https://mdsr-book.github.io/mdsr3e/>. 
+
+At the conclusion to the activity, you should upload
+
+1. your .html file named LastnameFirstInitial_STAT380_HW3.html 
+2. your .Rmd file named LastnameFirstInitial_STAT380_HW3.Rmd
+
+## Learning Objectives
+This assignment address aspects of the following learning objectives.
+
+1. Students will be able to load datasets from R packages and external sources into the R environment.
+2. Given multiple tables, students will be able to combine the tables using appropriate types of joins.
+3. Students will be able to identify R functions for and perform data wrangling tasks such as filtering observations based on a criterion, creating new variables, and restructuring data.
+4. Given one or more variables, students will be able to calculate summary statistics for exploring the distribution of the variable or the relationship between the variables numerically. 
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Front Matter - Clean Environment, Load Libraries, User Defined Functions
+```{r}
+rm(list = ls())
+#Add libraries as needed
+library(tidyverse)
+library(dplyr)
+library(Lahman)
+data(Batting)
+data(People)
+```
+
+
+## Problem 1
+
+This problem uses data from the `Lahman` database. In this problem, we will use the `Batting` table and the `People` table (each row of which contains a player’s name, birth date, weight, etc.). The goal of this question is to explore a baseball statistic known at the “batting average”, which measures the rate at which a player gets a HIT (`H`) relative to the AT BATS (`AB`).
+
+a. Using the `Batting` table, create a new dataset called `BattingAvg` that includes player identifier (`playerID`), year identifier (`yearID`), the team (`teamID`), the number of at bats (`AB`), the number of hits (`H`), and a new variable that you will create called `BA` (for batting average). As in the previous HW, `BA` should be equal to hits (`H`) divided by at bats (`AB`). Display the first five rows of the table.
+
+```{r}
+BattingAvg <- Batting %>%
+  select(playerID, yearID, teamID, AB, H) %>%
+  mutate(BA = H/AB)
+
+head(BattingAvg, 5)
+```
+
+b. Unfortunately, `BattingAvg` does not contain the player’s actual name. (`playerID` has elements of the name, but it is not complete.) Fortunately, the `People` table has this information. Perform an appropriate join so that the variables first name (called `nameFirst` in `People`) and last name (`nameLast`) from `People` are added to the `BattingAvg` table. Display the first five rows of the table. Be sure that you do not include all variables from `People`.
+
+```{r}
+BattingAvg <- left_join(BattingAvg, People, by = "playerID") %>%
+  select(playerID, yearID, teamID, AB, H, nameFirst, nameLast, BA)
+
+head(BattingAvg, 5)
+```
+
+c. A batting average of 0.400 or higher is an incredibly rare feat in baseball. Excluding players with fewer than 450 at bats, create a dataset called `Club400` that contains the players who have had a batting average of 0.400 or higher. Display the first five rows of the table.
+
+```{r}
+Club400 <- BattingAvg %>%
+  filter(AB >= 450, BA >= .400)
+
+head(Club400,5)
+```
+
+**Use the results from Part c. to answer the remaining questions.**
+
+d. How many times has a player achieved a batting average of 0.400 or higher? (If a player achieved this accomplishment twice, count them twice.)
+
+only 25 times, has a player with at least 450 at bats, achieved a batting average of .400 or higher.
+
+e. Which players (include their first name, last name, year, and batting average) have achieved the three highest batting averages in the history of baseball? You should write code that will create the dataset and display the three rows.
+
+```{r}
+e_Club400 <- Club400 %>%
+  select(nameFirst, nameLast, yearID, BA) %>%
+  arrange(desc(BA))
+
+head(e_Club400, 3)
+```
+
+The three players to have achieved the three highest Batting averages are Hugh Duffy(.439), Tip O'Neill(.435), and Nap Lajoie(.426)
+
+f. Which player (first name, last name, year, and batting average) was the most recent to achieve a batting average of 0.400 or higher? You should write code to display the row for the player.
+
+```{r}
+f_Club400 <- Club400 %>%
+  select(nameFirst, nameLast, yearID, BA) %>%
+  arrange(desc(yearID))
+
+head(f_Club400, 1)
+```
+
+Ted Williams was the most recent player to achieve a batting average of .4 or higher.
+
+## 2. Problem 2 
+
+a. This problem uses data from the `Lahman` database. Using the `Batting` and `People` tables, write code that will create a table showing every player in baseball history who has accumulated at least 300 home runs (`HR`) and at least 300 stolen bases (`SB`). Include the players first and last names, total HRs, and total stolen bases. NOTE: This is not asking about the 300 home runs in a single year, but 300 homeruns over the player’s entire career. Similar with stolen bases.
+
+```{r}
+PlayerStats <- Batting %>%
+  group_by(playerID) %>%
+  summarize(TotalHR = sum(HR, na.rm = TRUE),
+            TotalSB = sum(SB, na.rm = TRUE))
+
+FilteredPlayers <- PlayerStats %>%
+  filter(TotalHR >= 300 & TotalSB >= 300)
+
+FilteredPlayers <- FilteredPlayers %>%
+  left_join(People, by = "playerID") %>%
+  select(playerID, nameFirst, nameLast, TotalHR, TotalSB)
+
+FilteredPlayers
+```
+
+
+b. Using the `Pitching` and `People` tables, write code that will create a table showing every pitcher in baseball history who has accumulated at least 300 wins (`W`) and at least 3,000 strikeouts (`SO`). Include the players first and last names, total wins, and total strikeouts.
+
+```{r}
+PitcherStats <- Pitching %>%
+  group_by(playerID) %>%
+  summarize(TotalWins = sum(W, na.rm = TRUE),
+            TotalSO = sum(SO, na.rm = TRUE))
+
+FilteredPitchers <- PitcherStats %>%
+  filter(TotalWins >= 300 & TotalSO >= 3000)
+
+FilteredPitchers <- FilteredPitchers %>%
+  left_join(People, by = "playerID") %>%
+  select(playerID, nameFirst, nameLast, TotalWins, TotalSO)
+
+FilteredPitchers
+```
+
+c. Using the `Batting` and `People` tables, write code to create a table showing the three players with the most career hits. Display the top 3. Include player's first name, last name, and total hits.  
+
+```{r}
+PlayerStats2 <- Batting %>%
+  group_by(playerID) %>%
+  summarize(TotalHits = sum(H, na.rm = TRUE)) %>%
+  arrange(desc(TotalHits))
+
+PlayerStats2 <- PlayerStats2 %>%
+  left_join(People, by = "playerID") %>%
+  select(playerID, nameFirst, nameLast, TotalHits)
+
+head(PlayerStats2,3)
+```
+
+
+## 3. Problem 3
+
+a. We often use data to answer questions. The process begins with a research question which is followed by a collection of data that will help us to answer the question, an analysis, and a conclusion. This problem is meant to explore this process. Suppose we wish to answer the research question: For baseball players born in the USA, is the percentage of left-handed players higher than the percentage of left-handed people in general, which is estimated to be approximately 10\%? Fortunately, the data has been collected and is available in the `People` table. i) Begin by writing a sentence or two explaining your approach for answering the question. This explanation should include how you plan to establish left-handedness from the given data and how you plan to answer the question. ii) Then, write code to answer the question. The code should automate the calculations so that if I provided a different dataset with the same variable names, the code would still perform all calculations. iii) Finally, write a conclusion based on your analysis. NOTE: This problem is meant to be a little more open-ended than other problems. The goal is to explore your thought process and practice communicating. Be creative.
+
+i) To answer the research question I need to identify left-handed baseball players among those born in the USA, calculate the percentage of left-handed players among this specific group, and compare this percentage with the estimated general population percentage. I plan on using the dplyr functions like filter, groupby, and summarize to conduct these steps.
+
+ii)
+```{r}
+baseball_players_usa <- People %>%
+  filter(birthCountry == "USA")
+
+left_handed_percentage <- baseball_players_usa %>%
+  summarize(LeftHandedPercentage = mean(bats == "L", na.rm = TRUE))
+
+general_population_percentage <- 0.10  
+
+comparison_result <- left_handed_percentage$LeftHandedPercentage > general_population_percentage
+
+left_handed_percentage
+comparison_result
+```
+
+iii) Based on my analysis of the data, I found that the percentage of left-handed baseball players born in the USA is approximately 28.97% which is higher than the estimated general population percentage of 10%. This suggests that left-handedness among baseball players born in the USA is higher than the general population. Further research and analysis could explore the factors contributing to this difference.
+
+
+
+
+
+

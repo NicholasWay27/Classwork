@@ -1,0 +1,71 @@
+---
+title: "Activity 5"
+author: "Nicholas Way"
+date: "2023-10-20"
+output: html_document
+---
+
+## Front Matter
+```{r}
+remove(list = ls())
+library(tidyverse)
+library(palmerpenguins)
+library(FNN)
+
+data("penguins")
+
+penguins <- na.omit(penguins)
+```
+
+```{r}
+#Scale Data
+xvars <- c("bill_length_mm", "bill_depth_mm")
+penguins[ , xvars] <- scale(penguins[ , xvars], center = TRUE, scale = TRUE)
+
+# Train/Validation split
+set.seed(315)
+trainInd <- sample(1:nrow(penguins), floor(0.85*nrow(penguins)))
+set.seed(NULL)
+
+Train <- penguins[trainInd, ]
+Validation <- penguins[-trainInd, ]
+```
+
+```{r}
+#Initialize
+maxK <- 75
+accuracyVec <- rep(NA, maxK)
+
+
+
+#Loop
+for (i in 1:maxK) {
+
+knn_res <- knn(train = Train[ , xvars, drop = FALSE],
+               test = Validation[ , xvars, drop = FALSE],
+               cl = Train$species,
+               k = i)
+ 
+ Validation <- 
+  Validation %>%
+  mutate(pred_species = knn_res)
+ 
+ accuracyVec[i] <- mean(Validation$species == Validation$pred_species)
+
+}
+```
+
+```{r}
+tempDF <- data.frame(k = 1:maxK,
+                     accuracy = accuracyVec)
+
+ggplot(data = tempDF, mapping = aes(x = k, y = accuracy)) +
+         geom_line() 
+
+accuracyVec[which(accuracyVec == max(accuracyVec))]
+which(accuracyVec == max(accuracyVec))
+```
+
+As seen by the graph and the code finding the optimal values of k, there are exactly 10 k values that produce the maximum accuracy of .96.
+
+In this scenario, where there are multiple k values that yield the same max accuracy, we can choose any of these k values. We may consider some priorities like model complexity, computational resources, and our understanding of the problem we are trying to solve. In this case, I would probably pick one of the middle k values like 20. This would result in a stable, correctly fitted, and interpretable model for us to use.

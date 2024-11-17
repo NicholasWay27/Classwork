@@ -1,0 +1,73 @@
+---
+title: "STAT 400 Activity 1"
+author: Nicholas Way
+output: html_document
+date: "September 8, 2023"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Front Matter - Clean Environment, Load Libraries, User Defined Functions
+```{r}
+rm(list = ls())
+library(tidyverse)
+
+#Read in Data and create new variables
+real.estate <- read.table(file="https://online.stat.psu.edu/onlinecourses/sites/stat501/files/data/realestate.txt",header=TRUE)
+```
+
+
+## Problem 
+
+The dataset realestate.txt (from STAT 501) contains information about home prices in a given market. (There is code in the front matter section that will read in the dataset.) In particular, we are interested in predicting the sale price (in thousands of dollars), using square feet of living space (in thousands), the pool indicator, and the interaction between living space and pool. Suppose we want to compare a model for predicting the log (base 10) of the sale price of house based on the log (base 10) of square footage, a pool indicator, and the interaction between pool indicator and the log square footage to a model that only uses the log of square footage. (Code for creating the variables is given below.) We would compare the following models:
+
+$$\text{Full Model: } y_i=\beta_0+\beta_1 x_{i,1}+\beta_2 x_{i,2}+\beta_3 x_{i,1} x_{i,2}+\epsilon_i$$
+
+where 
+
+$$y_i=\text{common logarithm (i.e.,base 10 log) of sale price for } i^{th}  \text{ house}$$
+
+$$x_{i,1}=\text{common logarithm (i.e.,base 10 log)  of square footage for } i^th \text{ house}$$
+
+$$x_{i,2}=\text{a pool indicator for } i^th \text{ house (1=house has pool,0 otherwise)}$$
+
+to: 
+
+$$\text{Reduced Model: } y_i=\beta_0+\beta_1 x_{i,1}+\epsilon_i$$
+
+
+a. If we want to decide whether the full model could be reduced to the reduced model, we could perform the extra sum of squares F-test based on the anova function. State the hypotheses, report the test statistic, report the p-value, report the sampling distribution of the test statistic, a decision about rejecting the null hypothesis, and write a conclusion in the context of the problem.  
+
+## Code
+```{r}
+#Create New Variables, including interaction
+real.estate <- real.estate %>%
+                    mutate(log10Price = log10(SalePrice),
+                           log10SqFeet = log10(SqFeet),
+                           log10FeetPool = log10SqFeet*Pool)
+
+#Build Models
+full <- lm(log10Price ~ log10SqFeet + Pool + log10FeetPool, data = real.estate)
+
+reduced <- lm(log10Price ~ log10SqFeet, data = real.estate)
+#Compare Models
+
+anova(reduced, full)
+```
+
+Interpret the hypothesis test associated with the slope.
+
+1. Hypotheses
+    - Null Hypothesis: $H_0: \beta_2 = \beta_3 = 0$ 
+    - Alternative Hypothesis: $H_1: \beta_2 | \beta_3 \ne 0$
+
+2. Test Statistic: $F=2.7086$
+
+3. p-value: $p = .06757$
+
+4. Decision: Fail to Reject $H_0$. $p > .05$
+
+5. Sampling Distribution: F-distribution with 2 degrees of freedom in the numerator and 517 degrees of freedom in the denominator. Denoted as F(2, 517).
+
+6. Conclusion: There is not enough sufficient evidence to reject that the full model is preferred to the reduced model. We should use the reduced model that only includes $\beta_1$ or log10Price. In context, this means that the ${Reduced Model: } y_i=\beta_0+\beta_1 x_{i,1}+\epsilon_i$ is preferred over the ${Full Model: } y_i=\beta_0+\beta_1 x_{i,1}+\beta_2 x_{i,2}+\beta_3 x_{i,1} x_{i,2}+\epsilon_i$

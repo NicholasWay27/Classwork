@@ -1,0 +1,24 @@
+---
+title: "NW_Activity3"
+author: "Nicholas Way"
+date: "2023-10-16"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+titanic <- read.csv("C:/Users/nicho/OneDrive - The Pennsylvania State University/Stat 400/Lectures/L10_titanic3.csv")
+
+titanic$SexInd <- ifelse(titanic$Sex == "female", 1, 0 )
+
+levels(as.factor(titanic$Survived))
+levels(as.factor(titanic$SexInd))
+
+
+model1 <- glm(as.factor(SexInd) ~ Age + as.factor(Survived) + Fare, family = binomial, data = titanic)
+summary(model1)
+```
+

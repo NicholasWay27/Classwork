@@ -1,0 +1,296 @@
+---
+title: "STAT 400 HW 5"
+author: Nicholas Way
+date: "Saturday, October 21, 2023"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Front Matter
+```{r}
+rm(list = ls())
+
+library(tidyverse)
+
+MedGPA <- read.csv("C:/Users/nicho/OneDrive - The Pennsylvania State University/Stat 400/Homework/MedGPA.csv")
+```
+
+## Problem 1 - Conceptual Questions
+a. This problem is adapted from Conceptual Exercise 2 in our textbook: [Day Care Centers and Respiratory Health](http://bookdown.org/roback/bookdown-BeyondMLR/ch-logreg.html#conceptual-exercises-3). The study was designed to estimate the effects of the type of daycare (daycare center or home care) on the respiratory health in preschool aged children. The authors report, in a logistic regression controlling for confounding, children in daycare centers had blocked or runny nose without common cold more often during the past 12 months compared to those children with home care, odds ratio of 1.55. Interpret this odds ratio. NOTE: The odds ratio is the value we get when calculating $e^\hat{\beta}$.
+
+The odds ratio is 1.55, which in this context means that children in daycare centers have 1.55 times the odds of experiencing a blocked or runny nose without a common cold compared to children receiving home care.
+
+
+b. Explain why we should avoid using the linear predictor given by $p_i = \beta_0 + \beta_1 x_i$ when modeling $p_i = P(y_i = 1 \mid x_i)$ in the logistic regression context.
+
+The linear predictor can yield probabilities less than 0 or greater than 1, which do not make sense in a probability context. Logistic regression constrains the predicted probabilities between 0 and 1.
+
+Logistic regression is specifically designed for binary outcomes (0 or 1). It models the probability of an event occurring given a set of predictors. The linear predictor doesn't provide probabilities but produces continuous values.
+
+The logistic regression coefficients are more interpretable in terms of odds ratios while the linear regression coefficients do not have this straightforward odds ratio interpretation.
+
+In summary, logistic regression is the appropriate choice when modeling binary outcomes and estimating probabilities. The linear predictor used in linear regression is not suitable for this  due to its linearity and its inability to constrain predictions within the [0, 1] range.
+
+## Problem 2 
+
+This problem is inspired by Guided Exercise 2 in Section 6.8.2 of the textbook. [Medical School Admissions](http://bookdown.org/roback/bookdown-BeyondMLR/ch-logreg.html#guided-exercises-4). The data for Medical Schools Admissions may be found in `MedGPA.csv`, which is found on Canvas. The data are taken from undergraduates from a small liberal arts school over several years. We are interested in student attributes that are associated with higher acceptance rates. NOTE: When downloading the dataset from Canvas, please use Chrome. Safari and other browsers sometimes present challenges.
+
+a. Suppose our research goal is to investigate the impact of overall GPA (`GPA`) on the odds of being accepted into medical school (`Accept = "A"`) . Remove `eval=FALSE` and run the code given below. Explain the reason that this model does not directly help us to address our research goal.
+
+```{r}
+table(MedGPA$Accept)
+
+model1 <- glm(as.factor(Accept) ~ GPA, family = binomial, data = MedGPA)
+summary(model1)
+
+levels(as.factor(MedGPA$Accept))
+```
+
+This model does not directly help us address our research goal because the use of as.factor(Accept) has the levels of A = failure and D = success, which is not what we want. If trying to investigate the impact of overall GPA on the odds of being accepted into medical school, we want A = success and D = failure in our model.
+
+**For the remaining questions, assume that we are interested in exploring the impact of different variables on the probability/odds of being accepted into medical score.**
+
+b. Compare the relative effects of improving your MCAT score versus improving your GPA on your odds of being accepted to medical school. To answer this, build one model using MCAT and another model using GPA. Interpret the relevant coefficients with respect to the odds of being accepted.
+
+```{r}
+MedGPA$Accepted <- ifelse(MedGPA$Accept == "A", "1", "0")
+levels(as.factor(MedGPA$Accepted))
+
+modelbGPA <- glm(as.factor(Accepted) ~ GPA, family = binomial, data = MedGPA)
+summary(modelbGPA)
+
+modelbMCAT <- glm(as.factor(Accepted) ~ MCAT, family = binomial, data = MedGPA)
+summary(modelbMCAT)
+```
+
+odds = e^$\beta_0 + \beta_1...$
+
+coefficient(for odds) for GPA = e^5.454 ≈ 233.69
+coefficient(for odds) for GPA = e^.24596 ≈ 1.28
+
+The odds of being accepted to medical school decrease with a lower GPA, as indicated by the positive coefficient for GPA. On average, for each one-unit increase in GPA, the odds of being accepted increase by a factor of exp(5.454) ≈ 233.69.
+
+The odds of being accepted to medical school decrease with a lower MCAT score, as indicated by the positive coefficient for MCAT. On average, for each one-unit increase in MCAT score, the odds of being accepted increase by a factor of exp(.24596) ≈ 1.28.
+
+c. For which variable (GPA or MCAT score) is it more realistic that a student could increase the value by 1?
+
+It is more realistic that a student could increase their MCAT score by a value of 1, than that a student could increase their GPA by a value of 1. This is because the MCAT is an exam ranging with a large range of scores where as GPA is a grade point average ranging from 0-4. It is much easier to get one more point on the exam than it is to increase your grade point average by a whole value of 1.
+
+d. If the GPA increases by 0.1, what is the impact on the odds of being accepted?
+
+.1 * 5.454 = .5454
+exp(.5454) ≈ 1.725
+```{r}
+exp(.5454)
+```
+
+So, when GPA increases by 0.1, on average the odds of being accepted to medical school are estimated to increase by a factor of approximately 1.725.
+
+e. Report a 95% confidence interval for the impact of MCAT on the odds of being accepted.
+
+```{r}
+confint(modelbMCAT, level = .95)
+exp(confint(modelbMCAT, level = .95))
+```
+
+I am 95% confident that on average, the odds of being accepted are estimated to increase by a factor of roughly 1.094 (e^0.0899) to 1.555 (e^0.4413) for each one-unit increase in the MCAT score.
+
+f. If you were asked to pick between the models in Part b., could you use a drop-in-deviance test? Explain your reasoning.
+
+If asked to pick between the models in part b, I could not use a drop-in-deviance test because they are not nested, and a drop-in-deviance test can only be used to compare nested models. This means that if you zero out terms in one of the models, you will not get the resulting other model. If I were to compare the models, I would probably use AIC/BIC.
+
+g. By hand, use the model including only GPA to estimate the probability of being accepted for a student with a 3.1 GPA.
+
+log odds = -19.207 + 5.454(GPA), GPA = 3.1
+log odds = -19.207 + 16.9074
+log odds = -2.2996
+odds = e^-2.2996
+probability = (e^-2.2996)/(1+e^-2.2996)
+probability ≈ 0.0911
+
+h. Repeat Part g., but use software to find the prediction.
+
+```{r}
+linearpred <- predict(modelbGPA, data.frame(GPA = 3.1))
+linearpred
+k <- exp(predict(modelbGPA, data.frame(GPA = 3.1)))
+k/(1+k)
+```
+
+For both g and h, the probability of being accepted for a student with a 3.1 GPA is equal to .091
+
+i. After controlling for MCAT score, does GPA affect the odds of being accepted? Answer this question with an appropriate hypothesis test, be sure to include the hypotheses, test statistic, distribution of the test statistic under the null (and degrees of freedom if appropriate), p-value, and a conclusion in the context of the problem. NOTE: On the exam, I could ask, "Suppose we want to answer: After controlling for MCAT score, does GPA affect the odds of being accepted? What model(s) would you build to answer this and what test(s) would you perform. What distribution (including degrees of freedom if appropriate) does the test use for calculating p-values?
+
+```{r}
+modeli <- glm(as.factor(Accepted) ~ MCAT + GPA, family = binomial, data = MedGPA)
+summary(modeli)
+
+modelbMCAT <- glm(as.factor(Accepted) ~ MCAT, family = binomial, data = MedGPA)
+summary(modelbMCAT)
+
+anova(modelbMCAT, modeli, test = "Chisq")
+```
+
+1. Hypothesis:  
+
+$H_0$: $\beta2 = 0$ Coefficient for GPA = 0
+
+$H_a$: $\beta2 \neq 0$ Coefficient for GPA does not equal 0
+
+2. Test Statistic:
+
+Reduced model deviance - full model deviance = drop in deviance
+64.697 - 54.014 = 10.683
+
+3. P Value:
+
+```{r}
+dropdev <- 10.683
+1-pchisq(dropdev, df = 1)
+```
+p = .001
+
+4. Distribution:
+
+Chisquare distribution with a test statistic of 10.683 and df of 1
+
+5. Decision:
+
+Reject $H_0$ because p value is .001 which is less than .05
+
+6. Conclusion: 
+
+The model with MCAT and GPA as predictors is significant, therefore GPA($\beta_2$) should be included in our model when predicting the odds of being accepted into school.
+
+j. Does the impact of GPA on the odds of being accepted depend on the MCAT score? Answer this question with an appropriate hypothesis test, be sure to include the hypotheses, test statistic, distribution of the test statistic under the null (and degrees of freedom if appropriate), p-value, and a conclusion in the context of the problem.
+
+```{r}
+modeli <- glm(as.factor(Accepted) ~ MCAT + GPA, family = binomial, data = MedGPA)
+summary(modeli)
+
+modelj <- glm(as.factor(Accepted) ~ MCAT + GPA + (GPA * MCAT), family = binomial, data = MedGPA)
+summary(modelj)
+
+anova(modeli, modelj, test = "Chisq")
+```
+
+1. Hypothesis:  
+
+$H_0$: $\beta3 = 0$ Coefficient for GPA * MCAT = 0
+
+$H_a$: $\beta3 \neq 0$ Coefficient for GPA * MCAT does not equal 0
+
+2. Test Statistic:
+
+Reduced model deviance - full model deviance = drop in deviance
+54.014 - 53.186 = 0.828
+
+3. P Value:
+
+```{r}
+dropdev <- 0.828
+1-pchisq(dropdev, df = 1)
+```
+p = .363
+
+4. Distribution:
+
+Chisquare distribution with a test statistic of 0.828 and df of 1
+
+5. Decision:
+
+Fail to reject $H_0$ because p value is .363 which is greater than .05
+
+6. Conclusion: 
+
+The model with MCAT, GPA, and the term GPA * MCAT as predictors is not significant, therefore GPA * MCAT ($\beta_3$) should not be included in our model when predicting the odds of being accepted into school.
+
+k. Is there any evidence that the effect of MCAT score or GPA differs for males and females? Explain your reasoning.
+
+```{r}
+modelkMCAT <- glm(as.factor(Accepted) ~ MCAT + Sex, family = binomial, data = MedGPA)
+summary(modelkMCAT)
+
+modelkGMCAT <- glm(as.factor(Accepted) ~ MCAT + Sex + (MCAT * Sex), family = binomial, data = MedGPA)
+summary(modelkGMCAT)
+
+anova(modelkMCAT, modelkGMCAT, test = "Chisq")
+```
+
+1. Hypothesis:  
+
+$H_0$: $\beta3 = 0$ Coefficient for MCAT * Sex = 0
+
+$H_a$: $\beta3 \neq 0$ Coefficient for MCAT * Sex does not equal 0
+
+2. Test Statistic:
+
+Reduced model deviance - full model deviance = drop in deviance
+61.711 - 60.924 = 0.787
+
+3. P Value:
+
+```{r}
+dropdev <- 0.787
+1-pchisq(dropdev, df = 1)
+```
+p = .375
+
+4. Distribution:
+
+Chisquare distribution with a test statistic of 0.787 and df of 1
+
+5. Decision:
+
+Fail to reject $H_0$ because p value is .375 which is greater than .05
+
+6. Conclusion: 
+
+The model with MCAT, Sex, and the term MCAT * Sex as predictors is not significant, therefore MCAT * Sex ($\beta_3$) should not be included in our model when predicting the odds of being accepted into school. This means that the effect of MCAT scores does not differ for males and females.
+
+```{r}
+modelkGPA <- glm(as.factor(Accepted) ~ GPA + Sex, family = binomial, data = MedGPA)
+summary(modelkGPA)
+
+modelkGGPA <- glm(as.factor(Accepted) ~ GPA + Sex + (GPA * Sex), family = binomial, data = MedGPA)
+summary(modelkGGPA)
+
+anova(modelkGPA, modelkGGPA, test = "Chisq")
+```
+
+1. Hypothesis:  
+
+$H_0$: $\beta3 = 0$ Coefficient for GPA * Sex = 0
+
+$H_a$: $\beta3 \neq 0$ Coefficient for GPA * Sex does not equal 0
+
+2. Test Statistic:
+
+Reduced model deviance - full model deviance = drop in deviance
+53.945 - 53.729 = 0.216
+
+3. P Value:
+
+```{r}
+dropdev <- 0.216
+1-pchisq(dropdev, df = 1)
+```
+p = .642
+
+4. Distribution:
+
+Chisquare distribution with a test statistic of 0.216 and df of 1
+
+5. Decision:
+
+Fail to reject $H_0$ because p value is .642 which is greater than .05
+
+6. Conclusion: 
+
+The model with GPA, Sex, and the term GPA * Sex as predictors is not significant, therefore GPA * Sex ($\beta_3$) should not be included in our model when predicting the odds of being accepted into school. This means that the effect of GPA scores does not differ for males and females.
+
+## Uploads
+Please upload your .html and .Rmd files in Canvas. Name the files using LastnameFirstinitial_HW5.fileextension (i.e., I would use SlifkoM_HW5.html). 

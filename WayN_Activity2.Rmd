@@ -1,0 +1,136 @@
+---
+title: "STAT 400 Activity 2"
+author: Nicholas Way
+output: html_document
+date: "Due by 11:59 PM on Wednesday, September 13, 2023"
+---
+
+DUE: This activity is due by 11:59 PM (State College, PA time) on Wednesday, September 13, 2023. 
+Since we took class time to work on this activity, you will only receive credit if you were in class OR you notified me of your absence before class started. 
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Front Matter
+```{r}
+library(tidyverse)
+```
+
+## Background Information
+In a Poisson process, we are counting the number of events per unit of time or space and the number of events depends only on the length or size of the interval. As an example, we might want to know how many customers go through the drive-thru at Starbucks between 10 and 11 AM. We can then model $Y$, the number of events in one of these sections with the Poisson distribution, which is often used for modeling counts. The Poisson probability mass function (PMF) is given by: 
+
+$$P(Y=y \mid \lambda) = \frac{e^{-\lambda}\cdot \lambda^y}{y!} \hspace{2cm} \text{      for } y = 0, 1, 2, \ldots$$
+
+The Poisson distribution is characterized by the single parameter $\lambda$, which is the mean or expected count in the unit of time or space of interest. The value of $\lambda$ affects the shape of the distribution. **The goal of this activity is to understand how the value of $\lambda$ affects the shape of the distribution and how it relates to the mean and variance of the distribution.**
+
+
+## Task 1
+
+The code randomly generates 50,000 values from a Poisson distribution with parameter $\lambda = 0.5$ using the `rpois` function. (You can think of this as 50,000 random samples.) The plot that follows shows the empirical distribution of the 50,000 samples which approximates the shape of a Poisson distribution. In your markdown document, recreate the plot and answer the questions that follow:
+
+```{r}
+#Generate a random sample
+num_samples <- 50000
+set.seed(123) #This random number seeds allows us to get the same "random" results
+poisson_values <- rpois(n = num_samples, lambda = 0.5)
+set.seed(NULL)
+
+#Store data as data frame so it can be used with ggplot
+df <- data.frame(X = poisson_values)
+
+#Create Plot
+ggplot(data = df, mapping = aes(x = X)) +
+  geom_histogram(binwidth = 0.1) + 
+  annotate("text", x = 4, y = 25000, label= paste("The mean is ", round(mean(df$X), digits = 3))) + 
+  annotate("text", x = 4, y = 23000, label= paste("The variance is ", round(var(df$X), digits = 3))) +
+  labs(y = "Frequency",
+       x = "Value of Poisson Random Variable")
+```
+
+- What is the shape of the distribution?
+
+The shape of the distribution is heavily skewed right, with the frequency decreasing in a negative linear pattern in relation to the value of Poisson Random Variable
+
+- What do you notice about the relationship between the mean and variance of the samples and the value of the parameter, $\lambda$?
+
+The lambda value for this plot is .5 and resulted us with a mean of .494 and a variance of .493. It is easy to notice that these three values for lambda, mean, and variance are almost exactly the same equaling about .5
+
+## Task 2
+Copy the code from Task 1 into a new R chunk. Try a variety of values for $\lambda$ (use some smaller than 0.5 and some larger than 0.5). Then answer the following.
+
+```{r}
+#Generate a random sample
+num_samples <- 50000
+set.seed(123) #This random number seeds allows us to get the same "random" results
+poisson_values <- rpois(n = num_samples, lambda = 0.0005)
+set.seed(NULL)
+
+#Store data as data frame so it can be used with ggplot
+df <- data.frame(X = poisson_values)
+
+#Create Plot
+ggplot(data = df, mapping = aes(x = X)) +
+  geom_histogram(binwidth = 0.1) + 
+  annotate("text", x = .5, y = 25000, label= paste("The mean is ", round(mean(df$X), digits = 3))) + 
+  annotate("text", x = .5, y = 23000, label= paste("The variance is ", round(var(df$X), digits = 3))) +
+  labs(y = "Frequency",
+       x = "Value of Poisson Random Variable")
+```
+
+```{r}
+#Generate a random sample
+num_samples <- 50000
+set.seed(123) #This random number seeds allows us to get the same "random" results
+poisson_values <- rpois(n = num_samples, lambda = 10)
+set.seed(NULL)
+
+#Store data as data frame so it can be used with ggplot
+df <- data.frame(X = poisson_values)
+
+#Create Plot
+ggplot(data = df, mapping = aes(x = X)) +
+  geom_histogram(binwidth = 0.1) + 
+  annotate("text", x = 5, y = 10000, label= paste("The mean is ", round(mean(df$X), digits = 3))) + 
+  annotate("text", x = 5, y = 8000, label= paste("The variance is ", round(var(df$X), digits = 3))) +
+  labs(y = "Frequency",
+       x = "Value of Poisson Random Variable")
+```
+
+```{r}
+#Generate a random sample
+num_samples <- 50000
+set.seed(123) #This random number seeds allows us to get the same "random" results
+poisson_values <- rpois(n = num_samples, lambda = 50)
+set.seed(NULL)
+
+#Store data as data frame so it can be used with ggplot
+df <- data.frame(X = poisson_values)
+
+#Create Plot
+ggplot(data = df, mapping = aes(x = X)) +
+  geom_histogram(binwidth = 0.1) + 
+  annotate("text", x = 40, y = 5000, label= paste("The mean is ", round(mean(df$X), digits = 3))) + 
+  annotate("text", x = 40, y = 4000, label= paste("The variance is ", round(var(df$X), digits = 3))) +
+  labs(y = "Frequency",
+       x = "Value of Poisson Random Variable")
+```
+
+
+- What values of $\lambda$ did you try?
+I tried values at .0005, 10, and 50
+
+- What do you notice about the relationship between the mean and variance of the samples and the value of the parameter, $\lambda$?
+
+I notice that for whatever the value of lambda is, both the mean and variance of the samples are nearly identical to the value of lambda as well. This occurred in all 4 plots that I have looked at so far, with the difference between the values being only a couple hundredths or tenths.
+
+- At what value of $\lambda$ does the distribution start to look symmetric?
+
+When the value of lambda is equal to 10, the distribution starts to look symmetric. When the value of lambda is equal to 50, the distribution appears nearly perfectly distributed symmetrically.
+
+- Show the plot in which you believe the distribution looks symmetric. (In the annotate commands, you will have to change the values of x and y based on the values shown in your histogram.)
+
+The lambda = 10, 50 plots
+
+Upon completing this activity, you should upload 2 items to Canvas: i.) your .Rmd file AND ii.) your .html file. 

@@ -1,0 +1,230 @@
+---
+title: "STAT 400 HW 3"
+author: 'Nicholas Way '
+date: "Due: Wednesday, September 27 by 11:59 PM"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Front Matter
+```{r}
+remove(list = ls())
+
+#Add libraries if needed
+library(tidyverse)
+library(kableExtra)
+
+#Read In Dataset:
+elephants <- read.csv(file = "https://raw.githubusercontent.com/proback/BeyondMLR/master/data/elephant.csv")
+```
+
+## Problem 1 
+1. (Inspired by Guided Exercise 2 in the Chapter 4 Exercises) How does age affect male elephant mating patterns? An article by Poole (1989) investigated whether mating success in male elephants increases with age and whether there is a peak age for mating success. To address this question, the research team followed 41 elephants for one year and recorded both their ages and their number of matings. The data (Ramsey and Schafer 2002) is found in `elephant.csv`, which can be accessed on the book's [Github page](http://github.com/proback/BeyondMLR). The variables include:
+
+    * `MATINGS` = the number of matings in a given year
+    * `AGE` = the age of the elephant in years
+
+a. Create a histogram of MATINGS. Use a very small binwidth so that the discrete nature of the distribution is apparent. Is there preliminary evidence that number of matings could be modeled as a Poisson response? Explain.
+
+```{r}
+ggplot(data = elephants, mapping = aes(x = MATINGS)) +
+  geom_histogram(binwidth = .05, fill = "white", color = "black") +
+  labs(title = "Histogram of Matings",
+       x = "Number of Matings",
+       y = "Frequency")
+```
+- There is preliminary evidence that the number of matings could be modeled as a Poisson response. By looking at the histogram, there appears to be a slight skew to the right, with the center of the graph being focused near 2.5 on the x axis. This suggests that Poisson regression may be appropriate to use in this case.
+
+
+b. Create a plot for showing the relationship between AGE and MATINGS and include a linear model smoother. 
+
+```{r}
+ggplot(data = elephants, mapping = aes(x = AGE, y = MATINGS)) +
+  geom_point() +             
+  geom_smooth(method = "lm") +  
+  labs(title = "Relationship between AGE and MATINGS",
+       x = "Age (years)",
+       y = "Number of Matings")
+```
+
+
+c. Is there evidence that modeling matings using a linear regression with age might not be appropriate? Explain. (Hint: fit a linear model, check assumptions, and explain which assumption(s) is most likely to be violated).
+
+```{r}
+lm_model <- lm(MATINGS ~ AGE, data = elephants)
+summary(lm_model)
+plot(lm_model, which = c(1:2,4))
+```
+
+- After analyzing the summary of the model and checking the assumption plots, there is evidence that a linear regression model is not appropriate to use in this case.
+
+- First of all, according to the summary of the model, the $R^2 = .343$, which means that only 34.3% of the variation in matings can be explained by the elephant's age. This value for R squared does not leave me very confident in the linear regression model to predict matings accurately .
+
+- Looking at the residuals vs fitted plot, the plot seems to resemble a horizontal band across (residuals = 0) enough for me to feel that the linearity and equal variance conditions are met. For the Q-Q plot, even though the right tail starts to separate from the linear pattern a little bit, the plot as a whole is linear and therefore the normality condition is unmet. Looking at the cook's plot, there does not seem to be a point with enough cook's distance to cause any concern of highly influential points affecting the model.
+
+**Regardless of your answer to the previous question, we will now focus on Poisson Regression for the remainder of the analysis.**
+
+d. For each age, calculate the mean number of matings. Take the log of each mean and plot it by AGE.
+    * What assumption can be assessed with this plot?
+    * Is there evidence of a quadratic trend on this plot?
+
+```{r}
+age_means <- elephants %>%
+  group_by(AGE) %>%
+  summarize(mean_matings = mean(MATINGS))
+
+age_means$log_mean_matings <- log(age_means$mean_matings)
+
+ggplot(data = age_means, mapping = aes(x = AGE, y = log_mean_matings)) +
+  geom_point() +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2), color = "blue") +
+  labs(title = "Log of Mean Matings by Age",
+       x = "Age (years)",
+       y = "Log of Mean Matings")
+
+```
+
+- This plot can help assess whether there is a quadratic trend in the relationship between age and the log of mean matings. It helps us help evaluate whether a linear model is sufficient to describe the relationship or if a different model like a quadratic model, is needed.
+
+- Neither the points on the plot, as well as the trend line suggest a quadratic trend. This means that a quadratic model is most likely not appropriate to describe the relationship between age and matings in this data. 
+
+e. In Poisson regression, there is an assumption that the mean will equal the variance for a given value of x. If we were to only use AGE for predicting MATINGS, do you believe the assumption that mean=variance is met? To answer this, “discretize” age by cutting it into intervals of length 5 beginning with 25. Then, plot the distribution of MATINGS for each AGE interval and find the mean and variance of MATINGS for each interval. Comment on whether you believe the assumption is satisfied.
+
+    * NOTE: When the sample size is small (here it is 41), this assumption is very difficult to assess. Even when we discreteize age, some of the age groups have so few observations that is difficult to address whether the mean=variance and/or whether the Poisson assumption is reasonable.
+
+```{r}
+cuts = cut(elephants$AGE,
+           breaks = c(25,30,35,40,45,50,55))
+
+ageGRPs <- data.frame(cuts, elephants)
+
+ggplot(data = ageGRPs, mapping = aes(x = MATINGS)) +
+  geom_histogram(binwidth = .5, fill = "white", color = "black") +
+  facet_wrap(~cuts) +
+  labs(title = "Distribution of MATINGS by AGE Interval",
+       x = "Number of Matings",
+       y = "Frequency")
+
+table <- ageGRPs %>% 
+  group_by(cuts) %>%
+  summarise(meanNum = mean(MATINGS), varNum = var(MATINGS), n=n())
+
+kable(table, booktabs=T)
+
+```
+
+Due to there only being a small sample size of 41 observations, it is difficult to asses for Poisson when using intervals. Looking at the faceted plots, it appears that the intervals of (25,30], (30,35], and (40,45] resemble a poisson model where the mean and variance are equal. However, for the remaining intervals, there is no symmetrical pattern and no resemblance of a poisson model. When looking at the table with the listed means and variances for each age group, the means and variances are fairly equal for every age cut below 45 .So overall, I would conclude that the poisson assumption is reasonably met.
+
+f. Fit a Poisson regression model for MATINGS that is based on a linear term for AGE. Report the estimated equation for the log mean number of MATINGS.
+
+```{r}
+poisson_model <- glm(MATINGS ~ AGE, data = elephants, family = poisson)
+
+summary(poisson_model)
+```
+$$log(\lambda_imatings)=-1.582 + .069x_iage$$
+
+g. Interpret the rate ratio associated with AGE in the context of the problem.
+
+e^(.069) ≈ 1.071 
+
+As the age of the elephants increases by 1 year, I expect the mean number of matings to change by a factor of 1.071.
+
+h. Find a 90% confidence interval for the rate ratio associated with AGE **AND** interpret in the context of the problem.
+
+```{r}
+exp(confint(poisson_model, level = .90))
+```
+
+We are 90% confident that the mean number of matings increases by between 4.7% and 9.5% as age increases by 1 year
+
+i. As age increases, does the mean number of MATINGS increase, decrease, or stay the same? Explain your reasoning.
+
+As age increases, the mean number of matings increases as well according to our poisson model. Given by the summary, our $\beta1$ is positive, meaning that for every yearly increase in age, the number of expected matings should increase by that $\beta1$ coefficient. This can also be seen in the fact that our confidence interval gives values greater than 1, which means that we expect a percentage increase in the number of matings as the age increases yearly.
+
+j. Are the number of matings significantly related to age? Test with a drop-in-deviance test using a Type I Error rate of 0.05. 
+
+1. Hypothesis:  
+
+$H_0$: $\beta1 = 0$
+
+$H_a$: $\beta1 \neq 0$
+
+2. Test Statistic:
+
+Reduced model deviance - full model deviance = drop in deviance
+75.372 - 51.012 = 24.36
+
+3. P Value:
+
+```{r}
+1-pchisq(24.36, df = 1)
+```
+p = about 0
+
+4. Decision:
+
+Reject $H_0$ because p value is 0 which is less than .05
+
+5. Conclusion: 
+
+The model with age as a predictor is significant, therefore age is significantly related to the number of matings we expect
+
+k. Add a quadratic term in AGE to determine whether there is a maximum age for the number of matings for elephants. Is a quadratic model preferred to a linear model? Test with a drop-in-deviance test using a Type I Error rate of 0.05. 
+
+```{r}
+elephants$AGE2 <- elephants$AGE^2
+
+poisson_model2 <- glm(MATINGS ~ AGE + AGE2, data = elephants, family = poisson)
+
+summary(poisson_model2)
+
+dropdev <- poisson_model$deviance - poisson_model2$deviance
+
+anova(poisson_model, poisson_model2, test = "Chisq")
+```
+
+1. Hypothesis:  
+
+$H_0$: $\beta2 = 0$
+
+$H_a$: $\beta2 \neq 0$
+
+2. Test Statistic:
+
+Reduced model deviance - full model deviance = drop in deviance
+51.012 - 50.826 = .185
+
+3. P Value:
+
+```{r}
+1-pchisq(dropdev, df = 1)
+```
+p = .667
+
+4. Decision:
+
+Fail to reject $H_0$ because p value is .667 which is greater than .05
+
+5. Conclusion: 
+
+The model with age and age^2 as predictors is not significant, therefore age^2($\beta_2$) should not be included in our model when predicting the number of matings
+
+
+
+```{r}
+age_values <- seq(min(elephants$AGE), max(elephants$AGE), by = 1)
+
+predicted_matings <- predict(poisson_model2, newdata = data.frame(AGE = age_values, AGE2 = age_values^2), type = "response")
+
+plot(elephants$AGE, elephants$MATINGS, xlab = "Age", ylab = "Number of Matings", main = "Relationship between Age and Matings")
+lines(age_values, predicted_matings, col = "blue", lwd = 2)
+```
+
+- There does not appear to be a maximum age for the number of matings for an elephant. The the plot is showing a continuing positive trend and shows no sign of a decrease at any age.
+
+## Uploads
+Please upload your .html and .Rmd files in Canvas. Name the files using LastnameFirstinitial_HW3.fileextension (i.e., I would use SlifkoM_HW3.html).

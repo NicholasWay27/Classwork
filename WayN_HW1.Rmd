@@ -1,0 +1,126 @@
+---
+title: "STAT 400 HW 1"
+author: 'Nicholas Way '
+date: "Due: Friday, September 8, 2023 by 11:59 PM"
+output: html_document
+---
+
+## Problem 
+
+This problem is inspired by the Beyond Multiple Linear Regression (BMLR) book Guided Exercise 1 [Gender discrimination in bank salaries](https://bookdown.org/roback/bookdown-BeyondMLR/ch-MLRreview.html#guided-exercises). The data for this problem, banksalary.csv, may be found on the [textbook's Github page](https://github.com/proback/BeyondMLR). A description of the variables in the dataset may be found in the textbook problem statement. 
+
+## Front Matter - Clean Environment, Load Libraries, User Defined Functions
+```{r}
+rm(list = ls())
+library(tidyverse)
+banksalary <- read.csv("C:/Users/nicho/OneDrive - The Pennsylvania State University/Stat 400/Homework/banksalary.csv")
+#Add libraries as needed
+```
+
+## HW Tasks
+
+a. Identify observational units, the response variable, and explanatory variables. NOTE: Observational units are the units from which the response is measured. This is different than the units of measurement.
+
+The individual bank employees are the observational units in this dataset. The response variable is the salary of the employee. The explanatory variables are sex, age, educ, exper, and senior.
+
+b. The mean starting salary of male workers (\$5957) was 16% higher than the mean starting salary of female workers (\$5139). Confirm these mean salaries. Is this enough evidence to conclude gender discrimination exists? If not, what further evidence would you need?
+
+```{r}
+banksalary %>%
+  group_by(sex) %>%
+  summarize(MeanSalary = mean(bsal))
+```
+
+I can confirm that these averages are correct, however it is not enough evidence just to compare salaries based on sex, we must dive into other variables such as experience, seniority, and education level. If two employees of a different sex had the same experience, seniority, and education level, but had significant differences in salary, then it would be appropriate to call that gender discrimination.
+
+c. How would you expect age, experience, and education to be related to starting salary? Generate appropriate exploratory plots that show the relationship between the response and each of these explanatory variables broken down (faceted) by sex. Are the relationships as you expected? 
+
+I expect age, experience, and education to be positively correlated with starting salary. I expect that the more experience and education someone has, the more their salary will be.
+
+```{r}
+ggplot(data = banksalary, mapping = aes(x = age, y = bsal, color = sex)) +
+  geom_point()+
+  geom_smooth(se = FALSE)
+
+ggplot(data = banksalary, mapping = aes(x = exper, y = bsal, color = sex)) +
+  geom_point()+
+  geom_smooth(se = FALSE)
+
+ggplot(data = banksalary, mapping = aes(x = educ, y = bsal, color = sex)) +
+  geom_point()+
+  geom_smooth(se = FALSE)
+```
+
+Based on the plots it appears that as expected, there is a slightly significant and positive correlation between a person's age, experience, and education level and their corresponding starting salary. However, I did not expect to see that the male starting salary is typically significantly higher than the female starting salary across the board when similar in age, education level, and experience. Based on the plots, it is appropiate to suspect that gender discrimination may be occurring.
+
+d. Fit a simple linear regression model with starting salary as the response and experience as the sole explanatory variable (Model 1). Interpret the intercept and slope of this model; also interpret the R-squared value. Is there a statistically significant relationship between experience and starting salary?
+
+```{r}
+model1 <- lm(bsal ~ exper, data = banksalary)
+summary(model1)
+```
+The intercept is 5289.02, meaning that in the context of this data, the expected starting salary is $5,289 when the employee has zero months of prior work experience. The slope of this model is 1.3009 which in the context of this data, means that for every month fo work experience prior, the starting salary will increase by 1.3 dollars. The R^2 is .0278, which means that 2.78% of the total variance in the response variable(bsal) is explained by the model including experience. The p value for the model is .1102 which is > .05, suggesting that there is not a significance relationship between experience and starting salary.
+
+e. Find a 95\% confidence interval for the impact of experience on starting salary. Is it surprising that the interval contains 0? Explain.
+
+```{r}
+confint(model1, level = 0.95)
+```
+
+It is not surprising that the confidence interval contains 0 because we have determined that the relationship between experience and starting salary is not significant. When the interval contains 0, it implies that, within the given level of confidence (95% in this case), we cannot be confident that there is a significant relationship between experience and starting salary. This may suggest that experience alone may not be a strong predictor of starting salary in this dataset, or that other variables might have a more significant impact on starting salary.
+
+f. Consider a model (Model 2) for starting salary that includes 4 explanatory variables (senior, educ, exper, and age). Do you believe the multiple regression assumptions are satisfied when using Model 2? Be sure to include appropriate plots/diagnostics.
+
+```{r}
+model2 <- lm(bsal ~ senior + educ + exper + age, data = banksalary)
+plot(model2, which = c(1:2,4))
+```
+
+- For checking linearity and equal variance, I am using the residuals vs fitted values plot. As seen, the shape seems to resemble a horizontal line and there appears to be equal variance between the points, meaning that both the linearity condition and equal variance condition are met.
+
+- For checking the normality of our model, I am using the Q-Q Residuals plot. According to the plot, it seems that the points follow a linear pattern, meaning that the normality condition is met. 
+
+- For checking for influential points, I am using the Cook's distance plot. By looking at the plot, I do not feel that any points really stick out from the rest, in other words, there are no outliers or highly influential points.
+
+- Overall, the multiple linear regression assumptions(LINE) are met.
+
+g. Interpret the overall F test associated with Model 2. Be sure to include the hypotheses, test statistic, p-value, and a conclusion in the context of the problem.
+
+```{r}
+summary(model2)
+```
+
+1. Hypotheses
+    - Null Hypothesis: $H_0: \beta_1 = \beta_2 = \beta_3 = \beta_4 = 0$
+    - Alternative Hypothesis: $H_1: \beta_j \ne 0$ for at least one j in set (1,2,3,4)
+
+2. Test Statistic: $t=10.24$
+
+3. p-value: $p = 7.474 \times e^{-07}$
+
+4. Decision: Reject $H_0$. since p < .05
+
+5. Conclusion: There is sufficient evidence to reject that the intercept only model is sufficient. At least one of the explanatory variables of senior, age, exper, and educ should be included in the model for bsal.
+
+h. You should have noticed that the term for age was not statistically significant in Model 2. What does this imply about age and about future modeling steps?
+
+The fact that the term for age is not statistically significant in Model 2 implies that age does not have a significant impact on the variation in starting salary after accounting for the other explanatory variables (senior, educ, exper). In other words, when considering seniority status, education level, and years of experience, age does not add meaningful explanatory power to the model. In terms of future modeling steps, we could run a partial t-test for the variable age to confirm whether age is significant in this model or not, or we could create a new model3 that is the same as model2, but takes out the variable age.
+
+i. Interpret the slope associated with educ in Model 2.
+
+The slope for education in model2 is 130.1487, in context this means that for every year of education a person has, their starting salary would increase by about $130.15
+
+j. Interpret the y-intercept in Model 2.
+
+The y-intercept in model2 is 5879.5837, in context this means that if the values for all 4 explanatory variables in this model were 0, then the starting annual salary for the employee would be about $5879.58.
+
+k. Interpret $R^2$ for Model 2.
+
+The $R^2$ for model2 is 0.3176, which in context means that 31.76% of the total variance in bsal is explained by model2, including age, senior, educ, and exper.
+
+l. Interpet the residual standard error associated with Model 2. 
+
+The residual standard error for model2 is 599.4, which in context means that on average, the actual starting salaries of bank employees differ from the values predicted by the regression model by about 599.4 dollars.
+
+## Uploads
+Please upload your .html and .Rmd files in Canvas. Name the files using LastnameFirstinitial_HW1.fileextension (i.e., I would use SlifkoM_HW1.html).

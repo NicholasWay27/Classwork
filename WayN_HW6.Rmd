@@ -1,0 +1,259 @@
+---
+title: "STAT 400 HW 6"
+author: Nicholas Way
+date: "Due: Tuesday, October 31, 2023"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Front Matter
+```{r}
+#Add libraries if needed
+remove(list = ls())
+library(NHANES) #For dataset
+library(nnet) #For multinom function
+library(broom) #For nice coefficient tables
+library(tidyverse)
+library(kableExtra) #For nice tables
+library(lme4)
+library(pROC)
+
+FramTrain <- read.csv("C:/Users/nicho/OneDrive - The Pennsylvania State University/Stat 400/Homework/FramTrain.csv")
+
+FramValidation <- read.csv("C:/Users/nicho/OneDrive - The Pennsylvania State University/Stat 400/Homework/FramVal.csv")
+
+Moth <- read.csv("C:/Users/nicho/OneDrive - The Pennsylvania State University/Stat 400/Homework/moth.csv")
+```
+
+## Problem 1 (Lecture 11) 
+This problem is inspired by the Framingham Heart Study which is an ongoing cardiovascular study on residents of the town of Framingham, Massachusetts. Many variations of the dataset exist, but we will be using one variation from [Kaggle](http://www.kaggle.com/datasets/captainozlem/framingham-chd-preprocessed-data) for which someone has done some preprocessing/data cleaning. Variables include 
+
+* Demographic Variables:
+     * male: an indicator for sex (1: male, 0: female) (Nominal)
+     * age: Age of the patient;(Continuous - Although the recorded ages have been truncated to whole numbers, the concept of age is continuous)
+* Behavioral Variables
+     * education: 0: Less than High School and High School degrees, 1: College Degree and Higher (Nominal)
+     * currentSmoker: whether or not the patient is a current smoker, 1: Yes, 0: No (Nominal)
+     * cigsPerDay: the number of cigarettes that the person smoked on average in one day. (can be considered continuous as one can have any number of cigarettes, even half a cigarette.)
+* Medical (history) Variables
+     * BPMeds: whether or not the patient was on blood pressure medication, 1: On blood pressure medication, 0: not on blood pressure medication (Nominal)
+     * prevalentStroke: whether or not the patient had previously had a stroke, 1: Yes, 0: No (Nominal) 
+     * prevalentHyp: whether or not the patient was hypertensive, 1: Yes, 0: No (Nominal)
+     * diabetes: whether or not the patient had diabetes, 1: Yes, 0: No (Nominal)
+* Medical (current) Variables
+     * totChol: total cholesterol level (Continuous)
+     * sysBP: systolic blood pressure (Continuous)
+     * diaBP: diastolic blood pressure (Continuous)
+     * BMI: Body Mass Index (Continuous)
+     * heartRate: heart rate (Continuous - In medical research, variables such as heart rate though in fact discrete, yet are considered continuous because of large number of possible values.)
+     * glucose: glucose level (Continuous)
+Predict variable (desired target)
+     * TenYearCHD: 10 year risk of coronary heart disease CHD, 1: Yes, 0: No)
+
+We are interested in predicting whether the patient has a 10-year risk of future coronary heart disease (`TenYearCHD`). The dataset includes over 4,000 records and 15 attributes. Each attribute is a potential risk factor. There are demographic, behavioral, and medical risk factors. There are two research questions that we wish to answer:
+
+* (Inference) Which variables are related to the 10-year risk of future coronary heart disease (`TenYearCHD`) after controlling for the demographic variables sex and age?
+* (Prediction) How accurately can we predict 10-year risk of future coronary heart disease? 
+
+A comment on the data sets. When assessing predicting effectiveness of a model, we often take steps to guard against overfitting. One way to do this is to use a method called the Validation) set approach. Basically, we randomly split our dataset into two datasets, which we will call Train and Validation. The model is built using the Train. Then, we use the Validation, which had nothing to do with building our model, to assess how well the model will generalize to new data. We do this by applying the estimated regression equation based on the Train to obtain predictions for the Validation. I have performed the random split into Train and Validation for you. The datasets are named FramTrain.csv and FramVal.csv. NOTE: When downloading the datasets from Canvas, please use Chrome. Safari and other browsers sometimes present challenges.
+
+a. To answer the first research question, we will use the FramTrain dataset to perform variable selection using the forward selection method based on the AIC criterion. (Use the function `step` from the `stats` library). The code given below is one way of ensuring that we are controlling for the demographic variables by making sure they are included in the model. In addition to sex and age, which variables are included in the model for `TenYearCHD`? NOTE: You can remove `eval=FALSE` in the .Rmd file R chunk so that the code runs for you.
+
+```{r, eval=FALSE}
+reduced_mod <- glm(TenYearCHD ~ male + age, 
+                   family = binomial, 
+                   data = FramTrain) 
+full_mod <- glm(TenYearCHD ~ ., 
+            family = binomial,
+            data = FramTrain)
+ 
+#In the full_mod code, TenYearCHD ~ . means that we include all variables in the dataset (other than TenYearCHD) as predictors (X's)
+stats::step(reduced_mod, 
+            scope = list(lower=reduced_mod, upper=full_mod), 
+            data = FramTrain, 
+            direction = 'forward')
+```
+
+b. Using the variables selected in Part a. (be sure to include sex and age), build the logistic regression model for modeling the probability that the patient will have a 10-year risk of future coronary heart disease (TenYearCHD) using the FramTrain dataset. Include a summary of the model in your R output.
+
+```{r}
+model1b <- glm(formula = TenYearCHD ~ male + age + sysBP + cigsPerDay + 
+    glucose + prevalentStroke + totChol + prevalentHyp, family = binomial, 
+    data = FramTrain)
+
+summary(model1b)
+```
+
+```{r}
+exp(.306560)
+```
+
+c. Interpret the coefficient of `prevalentHyp` with respect to the odds of having a 10-year risk of future coronary heart disease.
+
+On average, assuming all other variables are held constant, when the patient is hypertensive, we expect the odds of having a 10-year risk of future coronary heart disease to change by a factor of e^.307 (or 1.359).
+
+d. Which variable(s), if any, reduce the odds of having a 10-year risk of future coronary heart disease? Explain your reasoning.
+
+There are no variables in this model that reduce the odds of having a 10-year risk of future coronary heart disease. This is because of the fact that all of the coefficients in the summary are positive, meaning that all of these variables will increase the odds.
+
+e. We now move on to answering research question 2 (How accurately can we predict 10-year risk of future coronary heart disease?). One way of doing this is to assess how well the predictions work for new data (i.e. FramVal). Using the model based on the FramTrain dataset (built in Problem 1b), obtain predictions for each patient in FramVal using a threshold of 0.5. Do **NOT** build a new model. Use the model from 1b to obtain predictions. Report the confusion matrix and find the following
+
+```{r}
+#Generate the predicted probabilities (call them pred_prob for later code)
+pred_prob <- predict(model1b, newdata = FramValidation, type = "response")
+
+#Generate predicted values of y (call them pred_surv)
+threshold <- 0.5
+pred_ten <- ifelse(pred_prob > threshold, "Yes", "No")
+
+table(pred_ten, FramValidation$TenYearCHD)
+```
+
+
+* the sensitivity of the test. (7/7+118) = 7/125 = .056
+* the specificity of the test. (695/695+7) = 695/702 = .99
+* the accuracy of the test. (695+7/7+7+695+118) = 702/827 = .849
+* the recall of the test. (7/7+118) = 7/125 = .056
+* the precision of the test. (7/7+7) = 7/14 = .5
+* the true negative rate of the test. (695/695+7) = 695/702 = .99
+
+NOTE: Yes, we learned a function that will find these probabilities for you, but you should be able to calculate them yourself as well. (This is the type of question I might ask on an in-class exam. Given a confusion matrix, calculate some probabilities.)
+
+f. The issue with the method in Part e. is that we are picking a single threshold. In many instances, we want to assess the quality of the predictions across a range of thresholds. To do this, create the ROC curve for the predictions of FramVal. Then, report the area under the curve (AUC).
+
+```{r}
+#Using roc from pROC library
+test_roc = roc(response = FramValidation$TenYearCHD,
+               predictor = pred_prob, 
+               plot = TRUE, print.auc = TRUE, 
+               legacy.axes=TRUE)
+
+
+#View AUC
+as.numeric(test_roc$auc)
+```
+
+The AUC is 0.6858575
+
+g. In FramTrain, which proportion of the responses are 0 for `TenYearCHD`? What is the majority class (0 or 1)?
+
+```{r}
+FramTrain %>%
+  filter(TenYearCHD == 0)
+#The amount of rows is the number of responses with 0 for TenYearCHD = 2803
+
+FramTrain %>%
+  filter(TenYearCHD == 1)
+#The amount of rows is the number of responses with 0 for TenYearCHD = 503
+
+# 503 + 2803 = 3306 which is same as full FramTrain dataset so it is correct. So to find proportion just need to divide 2803/3306 = 0.8478524
+
+2803/3306
+```
+
+The proportion of the responses are 0 for `TenYearCHD` is .848, and since this proportion is above .5, the majority class has the response 0, not 1.
+
+h. Suppose that we want to obtain predictions for `TenYearCHD` in FramVal by using the majority class in FramTrain. (In other words, we will either predict that everyone in FramVal is a 0 or everyone is a 1 based on the majority class in FramTrain.) If we use this approach instead of the logistic regression model, what is our accuracy?
+
+```{r}
+FramValidation %>%
+  filter(TenYearCHD == 0)
+#The amount of rows is the number of responses with 0 for TenYearCHD = 702
+
+FramValidation %>%
+  filter(TenYearCHD == 1)
+#The amount of rows is the number of responses with 0 for TenYearCHD = 125
+
+# 702 + 125 = 827 which is same as full FramValidation dataset so it is correct. So to find proportion just need to divide 2803/3306 = 0.8478524
+
+#FP = 0
+#TP = 0
+#FN = 125
+#TN = 702
+
+#Accuracy = (TP + TN/TP + TN + FP + FN)
+#Accuracy = (0 + 702/ 0 + 702 + 0 + 125)
+#Accuracy = 702/827 = .849
+
+702/827
+```
+
+Our accuracy is about .849
+
+## Problem 2 (Lecture 12) 
+
+This problem is inspired by Guided Exercise 3 in Section 6.8.2 of the textbook. [Moths](http://bookdown.org/roback/bookdown-BeyondMLR/ch-logreg.html#guided-exercises-4). The data may be found in `moth.csv`, which is found on [Roback's Github](http://github.com/proback/BeyondMLR) page in the data folder.  An article in the Journal of Animal Ecology by Bishop (1972) investigated whether moths provide evidence of “survival of the fittest” with their camouflage traits. Researchers glued equal numbers of light and dark morph moths in lifelike positions on tree trunks at 7 locations from 0 to 51.2 km from Liverpool. They then recorded the number of moths removed after 24 hours, presumably by predators. The hypothesis was that, since tree trunks near Liverpool were blackened by pollution, light morph moths would be more likely to be removed near Liverpool. The relevant variables:
+
+
+     * `MORPH` = light or dark
+     * `DISTANCE` = kilometers from Liverpool
+     * `PLACED` = number of moths of a specific morph glued to trees at that location
+     * `REMOVED` = number of moths of a specific morph removed after 24 hours
+
+a. Create an empirical logit plot of logits vs. `DISTANCE` by coded (colored) `MORPH`. What can we conclude from this plot? NOTE: It may take some data cleaning to create the variables necessary for finding the empirical logits.
+
+```{r}
+Moth$prop <- (Moth$REMOVED / Moth$PLACED)
+
+phat <- with(Moth, (REMOVED+.5)/(PLACED+1))
+Moth$elogit <- log(phat/(1-phat))
+
+logdis <- ggplot(data = Moth, mapping = aes(x=DISTANCE, y=elogit, color = MORPH))+
+    geom_point(shape=1) +   
+    geom_smooth(method=lm,   
+                se=FALSE)  
+
+logdis
+```
+
+Based on this plot alone, it seems that as the distance from Liverpool increases, the empirical log odds of being removed vary by the color of the moth. As distance increases it seems that the empirical log odds of being removed decreases for ligth colored moths, on the other hand, as distance increases it seems that the empirical log odds of being removed increases for dark colored moths.
+
+b. Do you believe the effect of `DISTANCE` depends on the value of `MORPH`? Justify your conclusion with an appropriate hypothesis test. HINT: Build 2 models and perform the appropriate drop-in-deviance test to answer the question. Be sure to include your hypotheses, test statistic, distribution of the test statistic under the null, p-value, and conclusion.
+
+```{r}
+reduced_model <- glm(cbind(REMOVED, PLACED - REMOVED) ~ DISTANCE + MORPH, family = binomial, data = Moth)
+full_model <- glm(cbind(REMOVED, PLACED - REMOVED) ~ DISTANCE + MORPH + (DISTANCE * MORPH), family = binomial, data = Moth)
+
+anova(reduced_model, full_model, test = "Chisq")
+teststat <- 25.161 - 13.230
+1-pchisq(teststat, 1)
+```
+1. Hypothesis: $H_0 : \beta_3 = 0$ $H_A : \beta_3 \neq 0$ 
+
+2. Test Statistic: Reduced Residual Deviance - Full Residual Deviance = 25.161 - 13.230 = 11.931
+
+3. P Value: 1-pchisq(teststat, 1) = .0005
+
+4. Distribution: A chi-squared distribution with degrees of freedom equal to the difference in the number of parameters between the two models so Chisq(1).
+
+5. Decision: P Value is < .05 so we reject the null hypothesis
+
+6. Context: By rejecting the null hypothesis, we are stating that we do believe the effect of DISTANCE depends on the value of MORPH. the interaction term (DISTANCE * MORPH) is significant in this model and should be included. The coefficient for this interaction term does not equal 0.
+
+c. For a model including `DISTANCE`, `MORPH`, and the interaction between them, test for goodness-of-fit. Be sure to include your hypotheses, test statistic, p-value, and conclusion.
+
+```{r}
+model2c <- glm(cbind(REMOVED, PLACED - REMOVED) ~ DISTANCE + MORPH + (DISTANCE * MORPH), family = binomial, data = Moth) 
+
+X2 <- sum(residuals(model2c, type = "pearson")^2)
+X2
+
+1-pchisq(X2, df = model2c$df.residual) #df.residual = n-p = 14 - 4 = 10
+```
+
+1. Hypothesis: $H_0 :$ Model Does Fit $H_A :$ Model Does Not Fit
+
+2. Test Statistic: X2 = 12.70859
+
+3. P Value: 1-pchisq(X2, df.residual) = .240
+
+4. Decision: P Value is > .05 so we fail to reject the null hypothesis
+
+5. Context: By failing to reject the null hypothesis, I am stating that the model does fit and works for predicting the empirical log odds
+
+
+## Uploads
+Please upload your .html and .Rmd files in Canvas. Name the files using LastnameFirstinitial_HW6.fileextension (i.e., I would use SlifkoM_HW6.html). 

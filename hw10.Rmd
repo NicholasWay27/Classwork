@@ -1,0 +1,122 @@
+---
+title: "Stat 300 Homework 10"
+author: "Nicholas Way"
+output:
+  html_document:
+    df_print: paged
+  word_document: default
+  html_notebook: default
+---
+
+```{r, echo=F, include=F}
+# front-matter
+rm(list = ls()) #clear the workspace
+
+# load the typical libraries
+library(Stat2Data)
+library(tidyverse)
+library(mosaic)
+library(ggformula)
+library(Lock5Data)
+library(tinytex)
+library(GGally)
+
+#load the data
+data("Grocery")
+```
+
+# Introduction
+
+Write your answers and include your notes in this document, and submit as a pdf or html online in the Canvas HW Quiz.
+
+Grocery stores and product manufacturers are always interested in how well the products on the store shelves sell. An experiment was designed to test whether the amount of discount given on products affected the amount of sales of that product. There were three levels of discount, 5%, 10%, and 15%, and sales were held for a week. The total number of products sold during the week of the sale was recorded. The researchers also recorded the wholesale price of the item put on sale.
+
+# 1. One-way ANOVA
+
+Choose, fit, assess, and use a one-way ANOVA model that investigates the relationship between Sales and Display type.  Be sure to include: EDA, a summary of the fitted model (ANOVA table), an assessment of the model conditions, and a justified conclusion in context that answers the research question: "Does display type of discounted items impact sales?"
+
+```{r}
+summary(Grocery)
+```
+There are three display types: Featured End, Featured Middle, and Not Featured. There are 12 different stores and there are 36 total observations with a totsal of 5 variables.
+
+```{r}
+ggplot(Grocery, aes(x = Display, y = Sales)) +
+  geom_boxplot() 
+```
+The not featured displays, seem to have the widest variation of sales compared to the other two kinds of displays. All three displays seem to have very similar median sales. Based on this plot I would assume that displays that are Featured End have the most sales.
+
+```{r}
+Model <- lm(Sales ~ Display, data = Grocery)
+
+summary(Model)
+```
+The p value of .9849 suggest that there is so significant difference between he display types. There is also a negative adjusted R squared.
+
+```{r}
+plot(Model)
+```
+
+Looking at the QQ plot, there seems to be a curvy and nonlinear pattern that suggests the condition of normal distribution is not met. The residuals vs fitted values plot is not random and does not form around the line 0 so the conditions of linearity and equal variance are not met.
+
+Given that the conditions of the model are not met, and the fact that the p value of the regression is far baove .05, we can conclude that there is no significant difference in sales when the display type is changed.
+
+# 2. One-way ANCOVA
+
+Now use an ANCOVA model to answer the same question, except now accounting for the *Price* of the individual items as well.  Again, include appropriate EDA, a summary of the fitted model (both ANOVA table and table of coefficients), an assessment of model conditions, and a justified conclusion in context that answers the modified research question "Does display type of discounted items impact sales after accounting for price?"
+
+```{r}
+ggpairs(Grocery, columns = c("Sales", "Price", "Display"))
+```
+
+I used the ggpairs function to just get a general idea of the different relationships between the variables Sales, Display and Price. There seems to be a positive linear relationship between Sales and Price despite what Display is. Price and Display seem to have very similar box plots as the Sales and Display box plots.
+
+```{r}
+Model2 <- lm(Sales ~ Display + Price, data = Grocery)
+
+summary(Model2)
+```
+
+The variable Price has a high f statistic of 27 and a p value of close to 0, suggesting that it is significant when considering Sales. From this summary it is still unclear whether Display is significant but I am leaning towards no.
+
+```{r}
+anova(Model2)
+```
+
+Based on the anova table fo our model, the high p value and low f statistic of the Display variable suggests that the variable is not a significant predictor of Sales. The high f statistic and near 0 p value for Price suggests once again that Price is a significant predictor for Sales.
+
+```{r}
+plot(Model2)
+```
+
+Here we are checking the conditions of the model to see if we can make an accurate conclusion based on our model. The residuals vs fitted values plot is relatively random and focused around the line = 0, therefore the conditions of equal variance and linearity are met. The qq plot is linear with some deviation at the tail ends, based on this the condition of normality are met. The residuals vs leverage plot is relatively random and focused around the line = 0, while still having no points beyond the cook's distance, therefore there are no points with too much influence over the model.
+
+Since the conditions of our model are met, we can conclude that based on our anova and regression outputs, Display is not a significant predictor of Sales. On the other hand, we can conclude that Price is a significant predictor of Sales.
+
+# 3. Two-way ANCOVA
+
+Fit a two-way main effects ANCOVA that includes Price, Discount, and Display to predict Sales.  You do not need to include EDA, but you do need to include the residual plots (fitted values vs residual and normal quantile plot), ANOVA table, and make a conclusion in context about what you learn.
+
+```{r}
+Model3 <- lm(Sales ~ Price * Discount * Display, data = Grocery)
+
+summary(Model3)
+```
+
+Using the summary of the model, we can look at the p values and f statistics of the interaction of terms to determine significance. Price, similar to part 2 has a significant p value and high f statistic, suggesting Price is once again a significant predictor of Sales. All of the interactions seem to be insignificant with extremely high p values, besides Discount 15% : Featured Middle with a p value of .09, which may be something to look for in the anova table.
+
+```{r}
+anova(Model3)
+```
+
+According to the anova table, both Discount and Price have extremely low p values and high f statistics, meaning that they are both significant predictors of Sales. The variable display has a moderate f statistic and moderate p value, but can not be considered significant. None of the interaction terms suggest significane either with high p values and low f statistics.
+
+```{r}
+plot(Model3)
+```
+
+Out of the three models, this seems to be the cleanest residuals vs fitted values plots, as it appears completely random while still focused around the line = 0, suggesting that linearity and equal variance are satisfied in the model. The qq plot is linear with decent tails extending on the ends, but the plot still satisfies the normality condition. The leverage vs residuals plot appears random with a few points at a cook's distance of .5, allowing us to conclude that all conditions are met for the model, allowing us to draw conclusions.
+
+After testing the conditions of the model, we can conclude that based on the outputs of the anova table and regression summary, both Price and Discount are significant predictors of Sales due to their extremely low p values and large f statistics. Display is once again not deemed a significant predictor of Sales due to it's large p value and low f statistic.
+
+It was interesting to see that across all three models, the variable Display, was consistently not deemed a significant predictor of Sales for the dataset Grocery.

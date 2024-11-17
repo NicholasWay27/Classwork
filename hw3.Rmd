@@ -1,0 +1,336 @@
+---
+title: 'Stat 300 Homework 3: Chapter 1'
+author: "Nicholas Way"
+output:
+  html_document:
+    df_print: paged
+---
+
+This homework assignment is based off the Chapter 1 exercises in The Stat2 textbook.  You may need to read the relevant problems in the text in order to complete this assignment.  Write your answers and include your notes in this document, and submit as a pdf in the Canvas HW3 quiz. Make sure you run all your code chunks before you hit 'preview' to create the pdf.
+
+**TASK** load all the packages that we are likely to need for this assignment:
+```{r, echo = T, include = F}
+rm(list = ls()) #clear the workspace
+
+library(Stat2Data)
+library(tidyverse)
+library(mosaic)
+library(ggformula)
+```
+
+# 1. Olympic long jump distances
+
+This section of the assignment is based off problems 1.4, 1.6, 1.8, 1.10, 1.12, and 1.24 in the text.
+
+The data set LongJumpOlympics2016 gives the length of the gold-winning jump distance in meters for all Olympic Games from 1900 to 2016.  In this example we use the year to predict the winning jump length. 
+
+**TASK 1.1.0** - Run the code below to visualize the relationship between 'Gold' (winning jump length) and 'Year' (year of the games).  
+
+```{r}
+data("LongJumpOlympics2016")  # load the dataset
+
+gf_point(Gold ~ Year, data = LongJumpOlympics2016) %>%
+  gf_lm()
+```
+
+**TASK 1.1.1** - Share your observations about the figure and any obvious outliers.
+The figure seems to be linear and positive correlated while possibly having an outlier around year 1970 at around 8.9 meters.
+
+
+
+**TASK 1.2.0** - Run the code chunk below to obtain a summary of the fitted least squares line.
+
+```{r}
+olympics_model <- lm(Gold ~ Year, data = LongJumpOlympics2016)
+summary(olympics_model)
+
+```
+
+  **TASK 1.2.1**  What are the slope and intercept for the least squares regression line for predicting the winning Olympic long jump length from year? 
+  The slope is .0125078 and the intercept is -16.470194
+  
+  **TASK 1.2.2** Interpret the slope in the context of this situation.
+  The intercept of -16.470194 means that at year 0, the long jump distance would be -16.470194 meters, which does not make sense for real life. The slope of .0125078 means that for every year after year 0, the long jump distance increases by .0125078 meters.
+
+
+
+  **TASK 1.2.3** What is the size of the typical error when predicting winning jump length from year, and what are the associated degrees of freedom?
+  The size of the typical error when predicting is .2595 on 26 degrees of freedom.
+
+
+
+**TASK 1.3.0** - Run the code below to plot the fitted values versus the residuals and the normal plot.
+```{r}
+mplot(olympics_model, which = 1) # plot the residuals and fitted values
+mplot(olympics_model, which = 2) # plot the normal plot for model residuals
+  
+```
+
+  **TASK 1.3.1** Which of the conditions for simple linear regression does the plot of fitted values versus residuals help you assess? 
+  The conditions of linearity, unequal error variances, and outliers are assessed when using a plot of fitted values versus residuals
+
+
+  
+  **TASK 1.3.2**  What does your plot tell you about potential problems (if any) with those regression conditions?
+  Unequal variance and outliers seem to be the potential problems when assessing the plot.
+
+
+  
+  **TASK 1.3.3**  Which of the conditions for simple linear regression does the  normal plot help you assess?  
+  The normal plot helps assess linearity, unequeal variance, outliers, and normality.
+
+
+  
+  **TASK 1.3.4**  What does your plot tell you about potential problems (if any) with those regression conditions?
+  The normal plot tells me that there are potential problems with unequeal variance and outliers. There seems to be a consistent linear pattern.
+
+
+  
+  
+# 2. Selling Houses in Grinnell, Iowa
+
+This section of the assignment is based off problems 1.20 and 1.22 in your textbook.  The data set 'GrinnellHouses' contains data from house sales in Grinnell, Iowa between 2005 and 2015.  We will investigate the relationship between the list price of the home (what the seller asks for the home when it goes on sale) and the final sale price.  We expect there to be a very strong relationship between these two variables.  In most, but not all, housing markets the final sale price is almost always lower than the list price.  Fun fact, in State College sale prices often exceed list prices because of the strong housing market created by the University.
+
+In this section, you are expected to do some of the coding yourself by changing the generic object names in the code below.
+
+**TASK 2.1.0** - Modify the code below to load the data set.  It is called GrinnellHouses.
+
+```{r}
+dataset <- data("GrinnellHouses")
+```
+
+**TASK 2.2.0** - Use the code below to explore the data a little bit and answer the numbered questions below the code chunk.
+
+```{r}
+head(GrinnellHouses) #don't forget to modify these
+glimpse(GrinnellHouses)
+```
+  **TASK 2.2.1** How many observations are there in the data set?
+  There are 929 observations
+
+
+ 
+ **TASK 2.2.2** How many variables are included in the data set?
+  There are 15 variables
+
+
+  
+**TASK 2.3.0** Make a scatter plot with ListPrice on the horizontal axis and SalePrice on the vertical axis.  If you like, add a least squares line to the figure.
+```{r}
+gf_point(SalePrice ~ ListPrice, data = GrinnellHouses)
+```
+  
+  **TASK 2.3.1** Comment on the pattern you see in the scatter plot.
+  The pattern is strongly positively correlated and linear. There seems to be a possible unequeal variance and outlier problem.
+
+
+  
+
+**TASK 2.4** Use R to fit the least squares regression line and answer the numbered questions below.
+
+```{r}
+HouseModel <- lm(SalePrice ~ ListPrice, data = GrinnellHouses)
+summary(HouseModel)
+```
+
+  **TASK 2.4.1** Write the equation for the least squares regression line for predicting sale price of a home based on asking price.
+  yhat = 9.431e-01x - 1.4483e+02
+ 
+ 
+  
+  **TASK 2.4.2** Interpret the value of the slope of the fitted in the context of this setting.
+  The slope of 9.431e-01 means that for every single increase of ListPrice by one unit, the predicted SalePrice increases by 9.4313-01 units
+
+
+  
+  **TASK 2.4.3** Report the standard error of regression for this model.
+  The standard error of regression for this model is 8019
+
+
+**TASK 2.5** Next, use residual plots to *assess* the model and determine if the conditions are met.
+
+```{r}
+mplot(HouseModel, which = 1) # plot the residuals and fitted values
+mplot(HouseModel, which = 2) # plot the normal plot for model residuals
+```
+ **TASK 2.5.1** Comment on what you observe in the above plots.  Does it appear that the conditions are met?  
+  The conditions are certainly not met. There is a clear unequeal variance problem and outlier problem.
+  
+  
+ 
+ 
+**TASK 2.6** Now *use* the model to make predictions and calculate residuals. The code below calculates the predicted sale price for a house whose list price is 99500. Run the code and then report the predicted sale price.
+```{r}
+predict(HouseModel,data.frame(ListPrice= 99500))
+```
+The predicted sale price is $93690.12
+
+  
+**TASK 2.7** The house at 1317 Prince Street has a listing value of 99500 and a sales price of 95000.  Find the residual for this data point.  You can use R to perform this calculation if you'd like.
+
+```{r}
+95000-93690.12
+```
+  The residual is 1309.88
+
+**TASK 2.8** Finally, use your knowledge of the standard error of regression to determine if this sales price seems unusually high or low for the list price.
+  This sales price seems unusually high for the list price because the predicted value is $1309.88 less than the actual value is.
+
+
+  
+# 3. Investigating factors that may influence pine tree growth
+
+This section of the assignment is based off questions 1.35, 1.36, and 1.37 of your textbook.
+
+The data set 'Pines' contains data from an experiment conducted by the Department of Biology at Kenyon College at a site near the campus in Gambier, Ohio.  In April 1990, student and faculty volunteers planted 1000 white pine seedlings at the Brown Family Environmental Center.  These seedlings were planted in two grids, distinguished by 10- and 15-foot spacings between the seedlings.  Several variables were measured and recorded for each seedling over time.  A description of the variables spans pages 55 and 56 in your textbook.  
+
+In this section, you are expected to produce your own code to answer the questions.  Keep in mind that it should be a copy-paste-change-variable-names type of code.
+
+**TASK 3.0** Load the data set and take a glimpse of its format.
+```{r}
+dataset <- data("Pines")
+glimpse(Pines)
+```
+
+  **TASK 3.1.1** How many observations are there?
+  There are 1000 observations
+  
+
+  **TASK 3.1.2** How many variables are included?
+  There are 15 variables
+  
+
+**TASK.2** Construct a scatter plot to examine the relationship between the initial height in 1990 and the height in 1996.  
+
+```{r}
+gf_point(Hgt96 ~ Hgt90, data = Pines)
+```
+
+  **TASK 3.2.1** Comment on any relationship you see.
+  There is no clear relationship between Hgt96 and Hgt90 in this scatterplot
+  
+  
+**TASK 3.3** Fit a least squares line for predicting the height in 1996 from the initial height in 1990, and assess how well the model fits your data.
+
+```{r}
+x <- Pines$Hgt90
+y <- Pines$Hgt96
+plot(x, y)
+abline(lm(y ~ x, data = Pines), col = "blue")
+```
+
+  **TASK 3.3.1** Are you satisfied with the fit of this simple linear model?  Explain why or why not.
+  I am not satisfied with the fit of this linear model because there are way too many outliers and there is a lot of unequal variance.
+
+
+  
+**TASK 3.4** Construct a scatter plot with a fitted regression line to examine the relationship between the initial seedling height and the height of the tree in 1997.  
+
+```{r}
+x <- Pines$Hgt90
+y <- Pines$Hgt97
+plot(x, y)
+abline(lm(y ~ x, data = Pines), col = "blue")
+```
+
+  **TASK 3.4.1** Do you expect that a simple linear model would be an appropriate choice for this data, considering what you know about the fit of the linear regression line for predicting height in 1996 from initial height?  Explain.
+  I do not think this is an appropiate choice of model for this data. There are still many outliers and a lot of unequeal variance from the fitted line.
+
+
+
+  **TASK 3.4.2**  Do you think that maybe using the height in 1996 to predict the height in 1997 would be a better predictor than the initial seedling height?  Why or why not?
+  I do think using the heights from 1996 would be a better predictor for the heights in 1997. They are only a year apart compared to 6 or 7 years apart. 
+
+
+
+**TASK 3.5** Fit the least squares line for predicting height in 1997 from height in 1996.
+
+```{r}
+x <- Pines$Hgt96
+y <- Pines$Hgt97
+plot(x, y)
+abline(lm(y ~ x, data = Pines), col = "blue")
+lm(y ~ x, data = Pines)
+```
+**TASK 3.6**  Does this simple linear regression model provide a good fit?  Explain your reasoning, and feel free to produce additional plots for justification.  
+  This simple linear regression model provides a good fit. This model meets the conditions of linearity, equal variance, and outliers. There does not appear to be any outliers and there seems to be an equal amount of variance throughout the plot.
+
+# 4. Baseball game times
+
+The data set BaseballTimes2017 includes data collected at www.baseball-reference.com for the 14 major league baseball games played on August 11, 2017 (two years ago!).  The variable *Time* is recorded in minutes, *Runs* and *Pitchers* are totals for both teams combined, and *Margin* is the difference between the winner's and loser's scores.  
+
+**TASK 4.0** Load the data set and take a glimpse of its format.
+```{r}
+dataset <- data(BaseballTimes2017)
+glimpse(BaseballTimes2017)
+```
+First, analyze the distribution of the response variable (*Time*) by itself.  
+
+  **TASK 4.1.1**  Create a graphical display (histogram, boxplot, dotplot, for example) and descriptive statistics for the response variable *Time*.   
+```{r}
+boxplot(BaseballTimes2017$Time)
+fav_stats(BaseballTimes2017$Time)
+```
+  
+  **TASK 4.1.2**  Describe the distribution of the variable *Time*.
+The boxplot graph is slightly skewed to the right and assymetrical. The mean is 191.6 and the standard deviation is 22. 09284.
+
+**TASK 4.2**. Examine scatterplots to investigate which of the quantitative predictor variables appears to be the best single predictor of time and comment on what the scatterplots reveal. 
+
+
+```{r}
+# you'll need a few gf_point(response ~ explanatory, data = dataset) %>% gf_lm) lines of code here.
+gf_point(Time ~ Game, data = BaseballTimes2017) %>% gf_lm()
+gf_point(Time ~ League, data = BaseballTimes2017) %>% gf_lm()
+gf_point(Time ~ Runs, data = BaseballTimes2017) %>% gf_lm()
+gf_point(Time ~ Margin, data = BaseballTimes2017) %>% gf_lm()
+gf_point(Time ~ Pitchers, data = BaseballTimes2017) %>% gf_lm()
+gf_point(Time ~ Attendance, data = BaseballTimes2017) %>% gf_lm()
+```
+
+**TASK 4.3** Choose the one predictor variable that you consider to be the best predictor of time and determine the regression equation for predicting time based on that predictor.  
+
+
+
+```{r}
+# you'll need an lm((response ~ explanatory, data = dataset) line here
+lm(Time ~ Pitchers, data = BaseballTimes2017)
+```
+
+  **TASK 4.3.1** Report the regression equation *and* interpret the slope.
+ yhat= 8.017x +124.069 The slope of 8.017 means that for every additional pitcher played, the times increases by 8.017 units (unsure if it's minutes or not).
+
+**TASK 4.4**. Generate the appropriate residual plots and comment on what they reveal about whether the conditions for inference appear to be met here.
+
+```{r}
+# remember you can use mplot(named model object, which = 1) for the fitted values versus residuals
+#                 and  mplot(named model object, which = 2) for the normal quantile plot
+#                 and  cooksplot(named model object) to diagnose unusual and 
+BaseballModel <- lm(Time ~ Pitchers, data = BaseballTimes2017)
+
+mplot(BaseballModel, which = 1)
+mplot(BaseballModel, which = 2)
+cooksplot(BaseballModel)
+
+```
+The Pitchers variable seems to be a good predictor for Time. The plots show that it meets the condition of equal variance and linearity. There is a possible problem with outliers as shown by points 6,7, and 13 in the normal q-q plot.
+
+
+**TASK 4.5**  Using *Runs* to predict *Time*, find the CIN-MIL point (Time = 235, Runs = 21) on the scatterplot and discuss whether you think it has a strong influence on the linear relationship between these variables.  Why or why not?
+
+```{r}
+gf_point(Time ~ Runs, data = BaseballTimes2017) %>% gf_lm()
+```
+I think the point at Time=235, Runs=21 does have a strong influence on the linear relationship of the variables. If the point was at a lower or higher time, the linear relationship would change dramatically. The point has high leverage as well as high influence on the plot.
+
+
+**TASK 4.6** Use the code below to omit the CIN-MIL point and find the least squares regression line without this point. Is there much change from the equation relating these two variables using the full dataset?  If you didn't use *Runs* in parts 1--4, you'll need to to fit the model with the point (using the original data) to answer this question.  
+
+
+```{r}
+newdata <- BaseballTimes2017[-6,] # make new data set that removes the sixth row, corresponding to the CIN-MIL game
+
+lm( Time ~ Runs, data = newdata) # fit a linear model with the new reduced data set
+lm( Time ~ Runs, data = BaseballTimes2017)
+```
+There isn't a lot of change between the two equations when comparing the relationship with and without the data point at (235,21). But without the point, the equation is yhat= 4.299x +146.972 and with the point included the equation is yhat = 4.181x + 148.043 I woudl not consider a 0.118 difference in slopes and a 1.071 difference in intercept to be greatly influential.

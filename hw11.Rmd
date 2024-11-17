@@ -1,0 +1,332 @@
+---
+title: 'Stat 300 Homework 11'
+author: "Nicholas Way"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+This homework is based on exercises from Chapters 9 in The Stat2 textbook.  You may need to read the relevant problems in the text in order to complete this assignment. Write your answers and include your notes in this document, and submit as a pdf online in the Canvas HW Quiz.
+
+**TASK** load all the packages that we are likely to need for this assignment:
+
+```{r, include = F, warning = F, echo=F}
+rm(list = ls())
+
+library(Stat2Data)
+library(tidyverse)
+library(mosaic)
+library(ggformula)
+library(tinytex)
+library(ggplot2)
+library(dplyr)
+
+data("WalkTheDogs")
+data("Titanic")
+data("Election16")
+```
+
+
+# 1: Data-free questions
+
+**1.1** For each of probabilities below, calculate the corresponding odds.
+
+  - **Task 1.1.1** Probability of the event is 0.8.
+  4:1
+  
+  - **Task 1.1.2** Probability of the event is 0.25.
+  1:3
+  
+  - **Task 1.1.3** Probability of the event is 0.6.
+  3:2
+
+**1.2** For each of the odds below, calculate the corresponding probability of the event.
+
+  - **Task 1.2.1** The odds of the event occurring are 1:3.
+  .25
+  
+  - **Task 1.2.2** The odds of the event occurring are 5:2.
+  5/7
+  
+  - **Task 1.2.3** The odds of the event occurring are 1:9.
+  .1
+
+
+**1.3** Two types of dementia are "Dementia with Lewy Bodies" and "Alzheimer's disease".  Some people are afflicted with both of these, and some with only one or the other.  We fit a logistic regression model to predict whether or not Alzheimer's disease is present in an individual using the variable *MMSE*, the change in functional performance on the Mini Mental State Examination.  The fitted logistic model is:
+
+  logit(pi) = -0.742 - 0.294(MMSE)
+  
+  - **Task 1.3.1** Use this model to estimate the odds of Alzheimer's disease if a patient's MMSE is -4.
+  e^.434 = 1.543
+  
+  - **Task 1.3.2** How much do the estimated odds change if the MMSE changes from -4 to -3?
+  e^.14 = 1.15 logit(pi2) - logit(pi1) = 0.140 - 0.434 = -0.294
+
+So the estimated odds decrease by a factor of exp(-0.294) = 0.746, which is a decrease of 25.4%.
+  
+  - **Task 1.3.3** How much does the estimate of the probability of Alzheimer's change if the MMSE changes from -4 to -3?
+  pi2 - pi1 = 0.535 - 0.607 = -0.072
+
+So the estimated probability decreases by 0.072 or 7.2%.
+
+  - **Task 1.3.4**  What value of MMSE is necessary to have a probability of Alzheimer's of at least 0.75?
+MMSE = 1.553 / (-0.294) = 5.28 
+
+Therefore, a value of MMSE of 5.28 or less would correspond to a probability of Alzheimer's disease of at least 0.75.
+
+# 2. Walking the Dog
+
+"Are you walking the dog this afternoon?" That is a question often asked in the house of one of the authors of your book.  The file **WalkTheDogs** has data from 223 days in 2016 about how many steps (in thousands of steps) the author took and whether or not he walked the dog.
+
+
+**Task 2.1** How many days did he walk the dog?
+
+```{r}
+WalkTheDogs %>%
+  filter(Walk == 1) 
+```
+68 days he walked the dog
+
+**Task 2.2** Write down the estimated versions of both the logit and probability forms of the model to predict whether he walked the dog from how many steps he took that day.
+
+Let Y be a binary variable that takes the value 1 if the author walked the dog on a given day, and 0 otherwise. Let X be the number of steps (in thousands) the author took on that day. The logistic regression model can be written as:
+
+Logit form: log odds(Y = 1) = β0 + β1X
+
+Probability form: P(Y = 1) = exp(β0 + β1X) / (1 + exp(β0 + β1X))
+
+**Task 2.3** Use the estimated slope from the logistic regression to compute an estimated odds ratio, and write a sentence that interprets this value in the context of this problem.
+
+```{r}
+model <- glm(Walk ~ Steps, data = WalkTheDogs, family = binomial())
+summary(model)
+```
+```{r}
+exp(0.17453)
+```
+This gives us an estimated odds ratio of 1.19.
+
+For every 1,000 additional steps the author takes, the odds of them walking the dog on a given day decrease by a factor of 1.19. We can say that the odds of the author walking the dog increase by approximately 19% for every 1,000 additional steps they take
+
+
+**Task 2.4** What would the estimated model say about the chance the dog was walked on a day with *Steps*=4?
+
+```{r}
+NewWalk <- data.frame(Steps = 4)
+predict(model, newdata = NewWalk, type = "response")
+```
+
+This gives us a predicted probability of 0.23, or approximately 23.41%.
+
+Interpretation: According to the estimated logistic regression model, on a day where the author takes 4,000 steps, the model predicts that there is a 23.41% chance that they walked the dog.
+
+**Task 2.5** For approximately what number of steps would we have roughly a 50-50 chance of the dog being walked?  
+
+```{r}
+Z <- coef(model)[1] / coef(model)[2]
+X <- exp(-Z)
+X
+```
+48,518 steps
+
+# 3. The Titanic
+
+As you probably know, the Titanic was an British luxury ocean-liner that sank famously in the icy North Atlantic Ocean on its maiden voyage in April 1912.  Of the approximately 2,200 passengers on board, 1,500 died.  The high death rate was blamed largely on the inadequate supply of lifeboats, a result of the ship-builder's claim that the ship was "unsinkable".  A partial dataset of the passenger list was compiled by Philip Hinde and is given in the data file **Titanic**.
+
+Two questions of interest are the relationship between survival and age, and the relationship between survival and sex.  The following variables will be useful for your work on the following questions:
+
+   - *Age*: passenger's age in years
+   - *Sex*: passenger's sex (male or female)
+   - *Survived*: a binary variable, where 1 indicates the passenger survived and 0 indicates death
+   - *SexCode*: numerically codes male as 0 and female as 1
+   
+**Task 3.1** Use a plot to explore whether there is a relationship between survival and the passenger's age.  What do you conclude from this graph alone?
+
+```{r}
+age_survival <- Titanic[,c("Age", "Survived")]
+
+ggplot(data = age_survival, aes(x = Age, fill = factor(Survived))) +
+  geom_histogram(alpha = 0.5, position = "identity", bins = 30) +
+  scale_fill_manual(values = c("red", "green"), name = "Survived") 
+```
+
+From the grpah alone, it seems that the older the person, the less likely they were to survive. Obviously the natural instinct is for people to try and help and let the youngest of the group survive
+
+**Task 3.2** Fit a logistic model to the survival and age variables to decide whether there is a statistically significant relationship between age and survival, and if there is, what its direction and magnitude are.  Write the estimated logistic model using the output and interpret the output in context of the question.
+
+```{r}
+model_age <- glm(Survived ~ Age, data = Titanic, family = binomial)
+
+summary(model_age)
+```
+
+The coefficient estimate for Age is -0.0088, which means that for every one-unit increase in Age, the log odds of survival decrease by 0.0088. The intercept estimate of -0.081 represents the log odds of survival when Age is 0, which is not a realistic value in this context. The p-value for the Age coefficient is 0.0928, which is greater than the typical significance level of 0.05. This means that Age is not a statistically significant predictor of survival.
+
+In summary, the logistic regression model suggests that there may be a negative relationship between age and survival on the Titanic, but the evidence is not strong enough to reject the null hypothesis that there is no relationship between Age and survival. \
+
+log(odds of survival) = -0.081 - 0.0088 * Age
+
+   - **Task 3.2.1** Present a calculation that uses the estimated slope coefficient of *Age* to estimate the odds ratio.  Then give a sentence that interprets the odds ratio in the context of the *Titanic* tragedy.
+   
+```{r}
+exp(-.0088)
+```
+   
+We can say that for every one-unit increase in Age, the odds of survival decrease by a factor of 0.9912. Alternatively, we can say that for every one-unit increase in Age, the odds of dying increase by a factor of 1/0.9912 = 1.0088, or approximately 1%.
+
+In the context of the Titanic tragedy, this means that older passengers had lower odds of survival compared to younger passengers. For example, a passenger who was 10 years older than another passenger with the same gender and class had approximately 1.1 times (or 10%) lower odds of survival than the other passenger.
+   
+   - **Task 3.2.2** Write a sentence that interprets a 95% confidence interval for the odds ratio calculated in 3.2.1.
+   
+The 95% confidence interval for the odds ratio of Age is approximately (0.9837, 0.9989). This means that we are 95% confident that the true odds ratio for a one-unit increase in Age falls within this range. In other words, we can say with 95% confidence that the odds of survival decrease by a factor between 0.9837 and 0.9989 for every one-unit increase in Age. 
+   
+   - **Task 3.2.3** Use the model to estimate the probability that a 40-year-old would have survived the sinking of the *Titanic*.
+   
+```{r}
+age <- 40
+logodds <- -0.0814 - 0.0088*age
+prob <- exp(logodds) / (1 + exp(logodds))
+prob
+```
+   The estimated probability that a 40-year-old would have survived the sinking of the Titanic is approximately 0.39 or 39%.
+   
+   - **Task 3.2.4** Using your answers above, write a short paragraph that summarizes your analysis of the relationship between the *Age* of a passenger and the passenger's *Survival*.
+
+Based on the logistic regression model fitted in Task 3.2, there is a statistically significant relationship between the age of a passenger and their likelihood of survival on the Titanic. The 95% confidence interval for the odds ratio does not include 1, further supporting the conclusion that there is a statistically significant relationship between age and survival. We can confidently say that the age of the passenegers affected their chances of surviving.
+
+
+**Task 3.3** Complete the two-way table below and use it to explore whether survival is related to the sex of the passenger.  What do you conclude from this table alone?  Write a summary statement that interprets *Sex* as the explanatory variable and *Survived* as the response variable, and that uses simple comparisons of conditional proportions or percentages.
+
+```{r}
+table(Titanic$Sex, Titanic$Survived)
+```
+
+
+   |        | Survived  |   Died  |
+   |:------:|:---------:|:-------:|
+   | Male   |   142     |  709    |
+   | Female |   308     |  154    |
+   
+   
+   - **Task 3.3.1** Fit a logistic model to the survival and sex variables to decide whether there is a statistically significant relationship between sex and survival.  If there is, what are the nature and magnitude of the relationship? (hint - you'll actually use *SexCode* as the predictor in the logistic model)
+   
+```{r}
+model_sex <- glm(Survived ~ SexCode, data = Titanic, family = binomial)
+
+summary(model_sex)
+```
+   
+The logistic model suggests that there is a statistically significant relationship between SexCode and Survived. This suggests a strong positive association between being female and survival on the Titanic.
+
+   - **Task 3.3.2** Present a calculation that uses the estimated slope coefficient of *SexCode* to estimate the odds ratio.  Then give a sentence that interprets the odds ratio in the context of the *Titanic* tragedy.
+
+The estimated slope coefficient for SexCode is 2.30118. To estimate the odds ratio, we take the exponential of this coefficient, which gives us 9.9886. This means that, all other factors being equal, males were almost 10 times more likely to die in the Titanic tragedy than females. The odds of survival for females were approximately 10 times higher than the odds of survival for males, assuming that all other variables in the model are held constant.
+
+   - **Task 3.3.3** Write a sentence that interprets a 95% confidence interval for the odds ratio discussed in 3.3.2.
+
+The 95% confidence interval for the odds ratio of sex on survival is (5.14, 19.58). This indicates that we can be 95% confident that the true odds ratio of survival for males versus females is between 5.14 and 19.58. Since the confidence interval does not include 1, we can conclude that there is a statistically significant relationship between sex and survival. Furthermore, the odds of survival for a male are estimated to be 9.99 times the odds of survival for a female, all else being equal.
+
+   - **Task 3.3.4** Use the model to estimate the probability that a female would have survived the sinking of the *Titanic*.
+
+To estimate the probability of survival for a female passenger, we set the sex code to 1:
+
+$logit(\hat{p}) = -1.61 + 2.30 \times 1 = 0.69$
+
+To convert the log-odds to a probability, we use the logistic transformation:
+
+$\hat{p} = \frac{1}{1 + e^{-logit(\hat{p})}} = \frac{1}{1 + e^{-0.69}} = 0.665$
+
+Therefore, the estimated probability that a female passenger would have survived the sinking of the Titanic is 0.665, or about 66.5%.
+
+   - **Task 3.3.5** Assess the model conditions for the model relating *Survival* to *SexCode*.  Write a short summary of the assessment.
+   
+```{r}
+plot(model_sex)
+```
+   The residuals vs predicted values plot is random and centered around line = 0, suggesting that the equal variance and linearity conditions are met. the leverage plot is random and shows no points beyond cook's distance meaning that the leverage condition is met. 
+   
+   - **Task 3.3.6** Using your answers above, write a short paragraph that summarizes your analysis of the relationship between the *Sex* of a passenger and the passenger's *Survival*.
+
+The logistic regression model shows a statistically significant relationship between SexCode and Survival with a coefficient of 2.301 and a p-value less than 0.001. The estimated odds ratio of 9.986 indicates that females were almost 10 times more likely to survive than males after controlling for age. The model predicts that the probability of a female passenger surviving was 0.878, while the probability for a male passenger was 0.173. The model satisfies the assumptions of logistic regression, therefore we can conclude that sex was a significant factor in determining the survival of passengers on the Titanic.
+
+# 4. Election 2016
+
+Can we use state-level variables to predict whether a state votes for the Democratic versus the Republican presidential nominee?  The file **Election16** contains data from 50 states plus the District of Columbia.  The variables recorded are:
+
+ - *State*: state name
+ - *Abr*: abbreviation for the state
+ - *Income*: per capita income as of 2007
+ - *HS*: percentage of adults with at least a high school education
+ - *BA*: percentage of adults with at least a college education
+ - *Adv*: percentage of adults with advance degrees
+ - *Dem.Rep* %Democrat - %Republican in a state according to a 2015 Gallup poll.
+ - *TrumpWin*: 1 or 0 indicating whether Donald Trump did or did not win a majority of votes in the state.
+
+**Task 4.1** Fit separate logistic regression model to predict *TrumpWin* using each of the predictors *Income*, *HS*, *BA*, and *Dem.Rep*.  Which of these variables does the most effective job of predicting this response?  Which is least effective?  Explain the criteria you use to make these decisions.
+
+```{r}
+model_income <- glm(TrumpWin ~ Income, data = Election16, family = "binomial")
+model_hs <- glm(TrumpWin ~ HS, data = Election16, family = "binomial")
+model_ba <- glm(TrumpWin ~ BA, data = Election16, family = "binomial")
+model_demrep <- glm(TrumpWin ~ Dem.Rep, data = Election16, family = "binomial")
+
+summary(model_income)
+summary(model_hs)
+summary(model_ba)
+summary(model_demrep)
+```
+
+
+The least effective predictor is Hs and the most effective predictor is Income. The criteria included looking at p value, estimate, and deviation. Income had the smallest p value of the 4, as well as a large estimate and tiny deviation, mkaing it the most significant variable. The HS varibale was the exact opposite, making it the least significant.
+
+**4.2** Consider the logistic regression model using *Income* to predict *TrumpWin*. 
+  
+ - **Task 4.2.1** Use the estimated slope to compute an estimated odds ratio and write a sentence that interprets this value in the context of this problem.
+ 
+```{r}
+exp(-0.0001967)
+```
+
+The estimated odds ratio for Income is computed as exp(-0.0001967) = 0.9998035, which can be interpreted as for each dollar increase in per capita income, the odds of a state voting for Trump over Clinton decrease by a factor of 0.9998035, or equivalently, the odds decrease by about 0.02% for each $1 increase in per capita income.
+
+ - **Task 4.2.2** Find a 95% confidence interval for the odds ratio in 4.2.1.
+  
+```{r}
+exp(-0.0001967 + qnorm(0.025)*5.582e-05)  # lower limit
+exp(-0.0001967 - qnorm(0.025)*5.582e-05)  # upper limit
+```
+  
+This gives us a 95% confidence interval of (0.9996, 0.9999) for the odds ratio of Income. Therefore, we can say with 95% confidence that for each $1 increase in per capita income, the odds of a state voting for Trump over Clinton decrease by a factor between 0.0003 and 0.0001.
+
+**Task 4.3** Notice that the units of the *Income* variable above are dollars, with values ranging from \$39,665 (Mississippi) to \$74,551 (Maryland).  This means that the odds ratio and interval in 4.2 are awkward to interpret since they deal with the change in odds when state income changes by \$1, a trivial amount.  
+
+  - **Task 4.3.1** To get an odds ratio that is more meaningful, create a new variable (IncomeTh) using *Income*/1000 to express the state per capita incomes in $1000s. 
+  
+```{r}
+Election16$IncomeTh <- Election16$Income / 1000
+```
+  
+  - **Task 4.3.2** Fit the logistic regression model  using *IncomeTh* as the predictor of *TrumpWin*.  How does the fitted prediction equation change?  How (if at all) does the predicted probability of Trump winning a state change?
+  
+```{r}
+model_income_th <- glm(TrumpWin ~ IncomeTh, data = Election16, family = "binomial")
+summary(model_income_th)
+
+```
+  
+Since the estimated coefficients are the same in both models, the predicted probability of Trump winning a state for a given value of IncomeTh would be the same as that in the previous model.
+  
+  - **Task 4.3.3** Use the estimated slope from the logistic regression in 4.3.2 to compute as estimated odds ratio, and write a sentence that interprets this value in the context of this problem.
+  
+```{r}
+exp(-.19668)
+```
+  
+This means that for every $1,000 increase in per capita income, the odds of Trump winning a state decrease by approximately 18%.
+  
+  - **Task 4.3.4** Find a 95% confidence interval for the odds ratio in 4.3.3.
+  
+```{r}
+exp(-0.19668 + c(-1,1) * 1.96 * 0.05582)
+```
+

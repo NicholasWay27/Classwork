@@ -1,0 +1,391 @@
+---
+title: 'Stat 300 Homework 5: Chapter 3'
+author: "Nicholas Way"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+  html_notebook: default
+---
+
+This homework is based on exercises from Chapter 3 in The Stat2 textbook. You may need to read the relevant problems in the text in order to complete this assignment. Write your answers and include your notes in this document, and submit it as a pdf or html in Canvas. 
+
+**TASK** load all the packages that we are likely to need for this assignment:
+
+```{r, include = F}
+library(Stat2Data)
+library(tidyverse)
+library(mosaic)
+library(ggformula)
+library(tinytex)
+library(car) #install.packages(car) first if you have not done so yet, only do the install once
+```
+
+# 1. Data-free problems
+
+### 1.1: True/ False 
+
+Decide if the following statements are True or False, and explain why:
+
+**TASK 1.1.1** For a multiple regression problem, the adjusted coefficient of determination, R-squared adjusted, will always be smaller than the regular, unadjusted R-squared.
+
+This statement is true because the adjusted coefficient of determination will always be lower than the unadjusted version due to the more accurate depiction of what percent of the response variable can be explained by the explanatory variable.
+  
+**TASK 1.1.2** If we fit a multiple regression model and then add a new predictor to the model, the adjusted coefficient of determination, R-squared adjusted, will always increase.
+
+This statement is false because the adjusted R-squared increases only if the new term improves the model more than would be expected by chance. It decreases when a predictor improves the model by less than expected by chance. The adjusted R-squared can be negative, but it’s usually not. It is always lower than the R-squared.
+
+**TASK 1.1.3** If we fit a multiple regression model and then add a new predictor to the model, the (unadjusted) coefficient of determination, R-squared, will never decrease.
+
+This statement is true, no matter how accurately the new predictor correlates witht he response variable, the unadjusted R-squared will always 
+increase when a new variable is added
+
+### 1.2: Body measurements
+
+Suppose you are interested in predicting the percentage of body fat (*BodyFat*) on a man using the explanatory variables waist size (*Waist*) and *Height*.  
+
+**TASK 1.2.1** Do you think that *BodyFat* and *Waist* are positively correlated?  Explain why or why not.
+
+I do think body fat and waist would be positively correlated if I had to guess. For most people, the majority of body fat is stored in the stomach and waist area, so I would predict that the larger waist you have, the more body fat you have.
+
+**TASK 1.2.2** For a fixed waist size (say, 40 inches) would you expect *BodyFat* to be positively or negatively correlated with a man's height?  Explain why.
+
+If the waist size was fixed, and we are only examining the relationship between body fat and height, I would guess that these two variables are positively correlated. Generally speaking, the taller someone is, the heavier they are, and the larger their body is as a whole. I would expect this common connection to cause a positive correlation.
+
+**TASK 1.2.3*  Suppose that *Height* does not tell you much about *BodyFat* by itself, so that the correlation between the variables is near zero.  What sort of coefficient on *Height* (positive, negative, or near zero), would you expect to see in a multiple regression equation to predict *BodyFat* based on both *Height* and *Waist*?  Explain your choice.
+
+f Height does not tell you much about Body Fat by itself, and the correlation between the two variables is near zero, we would expect to see a near zero coefficient on Height in a multiple regression to predict Body Fat based on both Height and Waist.
+
+### 1.3: Models for Well Water
+
+An environmental expert is interested in modeling the concentration of various chemicals in well water over time.  Assume the sample size is n = 40.  Identify the regression equation and degrees of freedom for error for regression models that would be used to...
+
+**TASK 1.3.1** Predict the amount of Arsenic (*Arsenic*) in a well based on *Year*, the distance (*Miles*) from a mining site, and the interaction of these two variables.
+
+y= amount of arsenic, x1= year, x2= miles
+
+   - **model**: y= B0 +B1x1 +B2x2 + B3x1x2 + e
+   - **degrees of freedom for error**: 36
+
+**TASK 1.3.2** Predict the amount of lead (*Lead*) in a well based on *Year* with two different lines depending on whether or not the well has been cleaned (*IClean*).
+
+y= amount of lead, x1= year, x2= iclean
+
+   - **model**: y= B0 + B1x1 + B2x2 + e
+   - **degrees of freedom for error**: 36
+
+**TASK 1.3.3** Predict the amount of titanium (*Titanium*) in a well based on a possible quadratic relationship with the distance (*Miles*) from a mining site.
+
+y= amount of titanium, x= miles
+
+   - **model**: y= B0 +B1x +B2x^2 +e
+   - **degrees of freedom for error**: 37
+
+**TASK 1.3.4** Predict the amount of sulfide (*Sulfide*) in a well based on *Year*, distance (*Miles*) from a mining site, depth (*Depth*) of the well, and any interactions of pairs of explanatory variables.
+
+y= amount of sulfide, x1= year, x2= miles, x3= depth, x23= interecation between x2 and x3
+
+   - **model**: y= B0 + B1x1 + B2x2 + B3x3 + B4x23 + e
+   - **degrees of freedom for error**: 35
+   
+
+### 1.4: Breakfast cereals
+
+This section is based on problems 3.2, 3.4, 3.6, and 3.22 in your text.
+
+In an attempt to learn whether cereals high in fiber are also high in sugar and calories, a team of researchers read the nutrition labels on the boxes of different types of breakfast cereals.  Note that you should complete this section without using the actual data, only the provided information in the questions.
+
+A regression model was fit to a sample of cereals.  The response variable, Y, is calories per serving.  The predictor variables are grams of sugar per serving and grams of fiber per serving.  The fitted regression model is
+  
+  (predicted calories) = 109.3 + 1.0(Sugar) - 3.7(Fiber)
+  
+**TASK 1.4.1**  How many calories would you predict for a breakfast cereal that had 1 gram of fiber and 11 grams of sugar per serving?
+
+Fill in the model as such, calories= 109.3 + 1(11) -3.7(1), which = 116.6 calories predicted
+
+**TASK 1.4.2**  Frosted Flakes is a breakfast cereal that has 1 gram of fiber and 11 grams of sugar per serving.  It also has 110 calories per serving.  Compute the residual for Frosted Flakes and explain what this value means.
+
+The residual is the actual value minus the predicted value so 110-116.6 = -6.6. This means that the predicted value overestimated the actual value by 6.6 calories.
+  
+**TASK 1.4.3**  Does the regression equation above suggest that the amount of sugar has a weaker relationship with the number of calories than the amount of fiber?  Explain why or why not.
+
+The regression equation above does suggest that the amount of sugar has a weaker relationship with calories y=than fiber does because of their respective slopes. For every gram of sugar, the amount of calories increases by 1, but for every gram of fiber, the amount of calories decreases by 3.7.
+  
+**TASK 1.4.4**  In the context of this setting, interpret -3.7, the coefficient of *Fiber*.  That is, describe how fiber is related to calories per serving in the presence of the sugar variable.
+
+The -3.7 in this context means that for every gram of fiber that is added to the equation, the amount of calories decreases by 3.7.
+
+
+**TASK 1.4.5**   The partition of the sums of squares for this model is 
+
+    - SSModel = 9350 
+    - SSE = 7840
+    - SSTotal = 17190
+ 
+Calculate R-squared for this model and interpret the value in the context of this setting.
+
+R^2= SSModel/SSTotal = 9350/17190 = 0.5439, This means that 54.39% of total variation in the sample of number of calories is explained by this regression model.
+
+**TASK 1.4.6**  Assuming n = 36, calculate the F-ratio test statistic for testing the null hypothesis that neither sugar nor fiber is related to the calorie content of cereals.
+
+F ratio= (SSModel/2)/(SSE/(n-3)) = (9350/2)/(7840/33) = 19.6779, where n = 36
+
+# 2. Crabs and ships
+
+This section is based on Question 3.30 in the textbook.
+  
+Animals that are stressed might increase their oxygen consumption.  Biologists measured oxygen consumption of shore crabs that were either exposed to 7.5 minutes of ship-noise or 7.5 minutes of ambient harbor noise.  They notice two things: (1) the greater the mass of the crab, the greater the rate of oxygen consumption and (2) ship-noise affected the crabs differently from ambient noise.
+
+The dataset **CrabShip** includes the variable *Noise*, which has two levels: "ambient" and "ship".  The variable *Mass* is the mass of the crab in grams.  The variable *Oxygen* is the rate of oxygen consumption. 
+```{r,include=F}
+data("CrabShip")
+```
+
+```{r}
+head(CrabShip)
+```
+
+
+**TASK 2.1.1**  Make a scatterplot of *Oxygen* on the Y-axis and *Mass* on the X-axis with *Noise* as a grouping variable for color.  Comment on the plot.
+
+
+```{r}
+gf_point(Oxygen ~ Mass, color = ~ Noise, data = CrabShip) #fill in the variables
+```
+   
+By looking at the plot, I infer that the relationship between Mass and Oxygen is positively correlated. It seems that the ship noises create a overall high level of oxygen consumption than ambien noises do.
+
+**TASK 2.1.2**   Fit the regression of *Oxygen* on *Mass* and test whether there is a linear association between the two variables.
+
+
+```{r}
+ggplot(data = CrabShip, aes(x= Mass, y= Oxygen))+
+  geom_point()+
+  geom_smooth(method = "lm", se =0)
+
+
+model <- lm(formula = Oxygen ~ Mass, data = CrabShip)
+summary(model)
+```
+
+There appears to be a very slight linear relationship between mass and oxygen.
+
+**TASK 2.1.3**  Fit a model that produces parallel regression lines for the two levels of *Noise* and observe the summary of the fitted model.
+
+```{r}
+# create an indicator variable that is 0 for ambient noise and 1 for ship-noise
+
+CrabShip$IndNoise <- as.numeric(CrabShip$Noise == "ship")
+
+# fit the model for two parallel lines below 
+
+model1 <-lm(Oxygen ~ Mass + IndNoise, data = CrabShip)
+CrabShip$pred_Oxygen <- predict(model1, CrabShip)
+summary(model1)
+ggplot(data = CrabShip, aes(x= Mass, y= Oxygen, color = Noise))+
+  geom_point()+
+  geom_line(aes(y= pred_Oxygen))
+```
+
+**TASK 2.1.4**  Fit the general model that produces nonparallel regression lines for the two levels of *Noise* and observe the summary of the fitted model.
+
+```{r}
+NonParalell <- lm(Oxygen ~ Noise +IndNoise, data = CrabShip)
+summary(NonParalell)
+```
+
+**TASK 2.1.5** Which of the three models above is the best choice, and why?  Write down the fitted regression equation for each level of *Noise* for your chosen model.  
+
+    - Equation for 'Ambient': 168.67 + 67.55x
+    - Equation for 'Ship': 108.4 + 1.77x
+    
+I would say that the best model is the second one with parallel lines since it has the highest R squared by far with .6278
+
+# 3. Diamonds
+
+This section is based on questions 3.37 to 3.40 in the textbook.
+
+The dataset *Diamonds* has information on several variables for 351 different diamonds.  The quantitative variables are size (*Carat*), price (*PricePerCarat* and *TotalPrice*), and the *Depth* of the cut.  The categorical variables measured are *Color* and *Clarity*.  
+
+```{r,include=F}
+data("Diamonds") # load the data
+```
+
+Assume you are helping a friend shop for a diamond and are interested in learning more about how these gems are priced.  You have heard about the four C's: carat, color, cut, and clarity.  Now you want to see if there is any relationship between these diamond characteristics and the price.
+
+### 3.1: Carat only
+
+**TASK 3.1.1**  Produce a scatterplot with *TotalPrice* on the Y-axis and *Carat* on the X-axis.  What does the plot suggest to you about a model predicting price from carat size?
+
+```{r}
+gf_point(TotalPrice ~ Carat, data = Diamonds)
+```
+
+The model appears to be exponential instead of linear. You can see this by the slight upward curve of the plot.
+
+**TASK 3.1.2** What is the fitted quadratic model using *Carat* to predict *TotalPrice*?  What are the values for R-squared and adjusted R-squared?
+
+```{r}
+Diamonds$Carat2 <- Diamonds$Carat^2 
+QuadraticModel <- lm(TotalPrice ~ Carat + Carat2, data = Diamonds)
+summary(QuadraticModel)
+```
+   
+R^2 adjusted : .9253,  R^2 unadjusted: .9257
+   
+**TASK 3.1.3**   Produce the relevant plots to check the fit of the quadratic model and comment on whether or not you think the model conditions are met (and why/why not).
+
+```{r}
+mplot(QuadraticModel, which = 1)
+mplot(QuadraticModel, which = 2)
+mplot(QuadraticModel, which = 3)
+cooksplot(QuadraticModel)
+```
+
+I feel that there are too many outliers and too much of an unequal distribution of variance for this model to be accepted. Linearity and distribution conditions are met.
+
+**TASK 3.1.4** What is the fitted cubic model using *Carat* to predict *TotalPrice*?  What are the values for R-squared and adjusted R-squared?
+
+```{r}
+model2 <- lm(TotalPrice ~ Carat +I(Carat^2) + I(Carat^3), data = Diamonds)
+summary(model2)
+```
+ 
+**TASK 3.1.5**   Produce the relevant plots to check the fit of the cubic model and comment on whether or not you think the model conditions are met (and why/why not).
+
+```{r}
+mplot(model2, which = 1)
+mplot(model2, which = 2)
+mplot(model2, which = 3)
+cooksplot(model2)
+```
+   
+   I think this cubic function is a little better than the previous two functions we have tried so far. The linearity, outlier, and equal variance conditions are met.
+   
+### 3.2: Diamonds: Carat and Depth
+
+Another variable in the dataset gives the *Depth* of the cut for each stone as a percentage of the diameter.  Run each of the models listed below, keeping track of the values for R-squared, adjusted R-squared, and which terms (according to the individual t-tests) are important in each model (write yes for important and no for not important).  
+
+ - A quadratic model using *Depth*
+ - A two-predictor model using *Carat* and *Depth*
+ - A three-predictor model that adds an interaction term for *Carat* and *Depth* 
+ - A complete second-order model using *Carat* and *Depth*.
+ 
+```{r}
+Diamonds$Depth2 <- Diamonds$Depth^2 
+QuadraticModel2 <- lm(TotalPrice ~ Depth + Depth2, data = Diamonds)
+summary(QuadraticModel2)
+```
+ 
+```{r}
+predictor2 <- lm(TotalPrice ~ Depth + Carat, data = Diamonds)
+summary(predictor2)
+```
+ 
+```{r}
+Three_Pred <- lm(TotalPrice ~ Depth + Carat + I(Depth*Carat), data = Diamonds)
+summary(Three_Pred)
+```
+ 
+```{r}
+Second_Order <- lm(TotalPrice ~ Depth + Carat +I(Depth*Carat) + I(Depth2*Carat2), data = Diamonds)
+summary(Second_Order)
+```
+ 
+ 
+**TASK 3.2.1** Use what you've learned to complete the table below.  Hint - you may need to hit preview a couple times as you enter values to see how the whole table looks and help you decide what to enter where.  I got you started by completing the entries for the *Carat* alone model.  I've entered in "???" where you need to enter values, and "NA" in places you don't.
+
+|Model | R-squared value | R-squared adjusted | Depth | Carat | Depth*Carat | Depth^2 | Carat^2 |
+|:----:|:---------------:|:------------------:|:-----:|:-----:|:-----------:|:-------:|:-------:|
+*Carat* alone|0.863|0.8629|NA|Yes|NA|NA|NA|
+Quadratic with *Depth*|.0474|.042|Yes|NA|NA|Yes|NA|
+2-predictor: *Carat* and *Depth*|.8704|.8696|Yes|Yes|NA|NA|NA|
+3-predictor: *Carat* and *Depth*|.89|.889|Yes|Yes|Yes|NA|NA|
+Second-order with *Carat* and *Depth*|.9316|.9308|Yes|Yes|Yes|Yes|Yes|
+
+**TASK 3.2.2**Considering the models above, along with the quadratic and cubic models for *Carat* that you explored in parts 1--3, which would you recommend using?  Explain your choice.
+
+I would recommend using the second order model given that it has the highest adjusted R squared at of all four models, which means that the response variable can be predicted from the explanatory variable the most.
+
+### 3.3: Diamonds: Transformation
+
+A persistent issue with the models above was the lack of a constant variance in the residuals.  This often happens with prices: the variability increases along with the predicted price.  
+
+**TASK 3.3.1** Using the model you chose above, produce one or more graphs to examine the conditions for homoskedasticity (constant variance), and normality of the residuals.  Do these standard regression conditions appear to be reasonable for your model?
+
+```{r}
+mplot(Second_Order, which = 1)
+mplot(Second_Order, which = 2)
+mplot(Second_Order, which = 3)
+cooksplot(Second_Order)
+```
+
+From looking at the plots above, the linearity, outliers, and equal varaince conditions appear to be met, making this model valid.
+
+**TASK 3.3.2** Transform the response variable using the log transformation.  Now use the same predictors from the previous question to predict the new response (logPrice = log(TotalPrice)).  Is this model still a reasonable choice for predicting logPrice?
+
+```{r}
+Diamonds$LogPrice <- log(Diamonds$TotalPrice) #create transformed response variable
+
+Transform_Model <- lm(LogPrice ~ Depth + Carat + I(Depth*Carat) + I(Depth2*Carat2), data = Diamonds)
+summary(Transform_Model)
+```
+
+This is still a reasonable choice to use as a model since it has an adjusted R squared of .9216
+
+**TASK 3.3.3**  If you answered "no" to part 2, make adjustments to add or delete terms, keeping within the options possible from a complete second-order model.
+
+I did not say no to part 2
+
+**TASK 3.3.4** Once you've decided on a model for *logPrice*, produce the same graphs from part (a) to assess the constant variance and normality conditions.
+
+```{r}
+mplot(Transform_Model, which = 1)
+mplot(Transform_Model, which = 2)
+mplot(Transform_Model, which = 3)
+cooksplot(Transform_Model)
+```
+
+Equal Variance, normality, and linearity appear to be met. But there is an outlier at point 345 that is worrying given that it is in the second red curve.
+
+### 3.4: Use the diamonds model
+
+Suppose a friend of yours is interested in a particular 0.5-carat diamond with a depth of 62% that she is interested in buying.  
+
+**TASK 3.4.1** Using the quadratic model (using only carat), predict the total price of the diamond.
+
+```{r}
+predict.lm(QuadraticModel, data.frame(Carat = .5, Depth = .62, Carat2 = .5^2))
+```
+
+**TASK 3.4.2** Find a 95% confidence interval for the mean total price of 0.5-carat diamonds using the quadratic model.  Write a sentence interpreting this interval in terms that will make sense to your friend, who has not taken a class like this one.
+
+```{r}
+favstats(Diamonds$TotalPrice)
+Carat_95 <- Diamonds %>% 
+  filter(Carat == ".5")
+t.test(~ TotalPrice, mu = 7450, alternative = "two.sided", data = Diamonds)
+```
+
+We are 95% confident that the mean total price of a .5-carat diamond will be between $6633.19 and $8266.84
+
+**TASK 3.4.3**. Find a 95% prediction interval for the total price of a 0.5-carat diamond using the quadratic model.  Write a sentence interpreting this interval in terms that will make sense to your friend, who has not taken a class like this one.
+
+```{r}
+data = data.frame(Carat = .5, Depth = .62, Carat2 = .5^2)
+predict(lm(TotalPrice ~ Carat + Depth + Carat2, data = Diamonds), data, interval = "prediction")
+```
+
+We are 95% confident that the total price of a .5-carat diamond will be between $3946.69 and $13763.25
+
+**TASK 3.4.4** Finally, repeat the previous two intervals for the model you chose to predict *logPrice*.  Note that finding an interval estimate for a transformed response variable requires two steps: first, find the intervals for *logPrice*, then exponentiate both sides of the interval to give answers in terms of the *TotalPrice*.  
+
+```{r}
+# Hint - to exponentiate a number in R, say the number 2, use the code exp(2)
+Log2 <- lm(TotalPrice ~ LogPrice + I(LogPrice^2), data = Diamonds)
+summary(Log2)
+```
+
+
+
+

@@ -1,0 +1,275 @@
+---
+title: 'Stat 300: Homework Assignment 2'
+author: "Nicholas Way"
+output:
+  html_document:
+    df_print: paged
+---
+
+This homework is based off the exercises from Chapter 0 and from Section 1.1. in the Stat2 textbook.  You may need to read the relevant problems in the text in order to complete this assignment.  Write your answers and include your notes in this document, and submit as a pdf or html in the Canvas HW2 quiz.  
+
+**TASK** load all the packages that we are likely to need for this assignment:
+```{r, echo = F, include = F}
+library(Stat2Data)
+library(tidyverse)
+library(mosaic)
+library(ggformula)
+library(tinytex)
+```
+
+## 1. Questions about variables
+
+Suppose a statistics professor records a variety of variables for each student enrolled in her intro stats class, with the goal of using these data to answer the research questions below. 
+
+**TASK--For each research question, identify the response and explanatory variable(s), and classify each variable as quantitative or categorical.  If a variable is binary (in addition to being categorical), say so.**
+
+ 1. Do the proportions of left-handers differ between males and females on campus?
+    - **Explanatory:** Male or Female - Categorical
+    - **Response:** Proportion of Left-handers - Quantitative
+ 
+ 
+ 2. Are time spent sleeping the night before, exam 1 score, and number of quizzes taken useful for predicting time spent on the final exam?
+    - **Explanatory:** Time sleeping the night before and the number of quizzes taken - Both quantitative
+    - **Response:** Time spent on the final exam - Quantitative
+ 
+
+ 3. Does knowing a student's biological sex help predict their major?
+    - **Explanatory:** Biological Sex - Categorical
+    - **Response:** Major - Categorical
+ 
+ 
+ 4. Does knowing a student's political inclination (liberal, moderate, conservative)  and time spent sleeping help predict their biological sex?
+    - **Explanatory:** Political inclination and time spent sleeping - Binary
+    - **Response:** Biological Sex - Categorical
+ 
+ 
+## 2. Scooping Ice Cream
+
+
+In a study reported in the *American Journal of Preventive Medicine*, 85 nutrition experts were asked to scoop themselves as much ice cream as they wanted.  Some of them were randomly given a large bowl (34 ounces) as they entered the line, and the others were given a smaller bowl (17 ounces).  Similarly, some were randomly given a large spoon (3 ounces) and the others were given a small spoon (2 ounces).  Researchers then recorded how much ice cream each subject scooped for themselves.  Their conjecture was that those given a larger bowl would tend to scoop more ice cream, as would those given a larger spoon.  
+
+**TASK 2.1.1--Identify the observational units in this study**
+The nutrition experts
+
+
+**TASK 2.1.2--Is this an observational study or a controlled experiment?** This is a controlled experiment because the researchers manipulated their study by randomizing the size of the bowls and spoons rather than just going to an ice cream shop and observing the customers.
+
+
+
+
+**TASK 2.1.3--Identify the response variable in this study, and classify it as quantitative or categorical**
+The response variable was the amount of ice cream that the nutrition experts were scooping for themselves. It is a quantitative variable because you are measuring a specific amount.
+
+
+
+**TASK 2.1.4--Identify the explanatory variable(s) in this study, and classify it (them) as quantitative or categorical**
+The variables are (1)the size of the bowl, and (2)the size of the spoon. Both of thsee variables are quantitative.
+
+
+
+
+The table below reports the average amounts of ice cream scooped (in ounces) for various treatments:
+
+|             | 17-ounce bowl | 34-ounce bowl |
+|------------:|:-------------:|:-------------:|
+|2-ounce spoon|    4.38       |    5.07       |
+|3-ounce spoon|    5.81       |    6.58       |
+
+
+**TASK 2.2.1--Does it appear that the size of the bowl had an effect on amount scooped?** It does appear that the size of the bowl had a small effect on the amount of ice cream scooped. When they had the same size spoon, the larger bowl had around .7 more ounces of ice cream than the person with the smaller bowl. 
+
+
+
+**TASK 2.2.2--Does it appear that the size of the spoon had an effect on amount scooped?** It does appear that the size of the spoon had a moderate effect on the amount of ice cream scooped. When the bowl sizes were the same, the person with the larger spoon had about 1.5 more ounces of ice cream than the person with the smaller spoon.
+
+
+
+**TASK 2.2.3--Which appears to have more of an effect: size of bowl or size of spoon?** The size of the spoon seems to have a larger effect than the size of the bowl when comparing the amount of ice cream scooped. The difference in spoon sizes result in about a 1.5 ounce difference in ice cream scooped, while the difference in bowl sizes only resulted in about a .7 ounce difference.
+
+
+
+
+**TASK 2.2.4--Does it appear the effect of the bowl size is similar for both spoon sizes, or does it appear that the effect of the bowl size differs substantially for the two spoon sizes?** It appears to me that the effect of bowl size is similar for both spoon sizes because they are both around a .7 ounce difference. For the 2-ounce spoon, the difference in ounces of ice cream scooped for the two different bowls was 0.69. For the 3-ounce spoon, the difference in ounces of ice cream scooped for the two different bowls was 0.77. An 0.08 ounce difference between the two spoon size does not appear to be signifigant enough to claim that the effect of the bowl size differs substantially for the two sponn sizes.
+
+
+
+
+## 3.Predicting NFL wins
+
+Consider the following model for predicting the number of games that a National Football League (NFL) team wins in a season:
+
+*Wins* = 3.6 + 0.5*PF* - 0.3*PA* + error
+
+where *PF* stands for average points a team scores per game over an entire season and *PA* stands for average points allowed per game over the season.  Each team plays 16 games in a season.
+
+**TASK 3.1.1--Identify the response variable in this study, and classify it as quantitative or categorical**
+The response variable is the number of wins a football team will have, which is a quantitative variable.
+
+
+**TASK 3.1.2--Identify the explanatory variables in this study, and classify them as quantitative or categorical**
+The explanatory variables are "PF" or the average points a team scores a game over the entire season, and "PA" or the average points allowed per game over a season. These are both quantitative variables. 
+
+
+**TASK 3.1.3--According to this model, how many more wins is a team expected to achieve in a season if they increase they scoring by an average of 3 points per game?**
+1.5 more wins in a season
+
+
+**TASK 3.1.4--According to this model, how many more wins is a team expected to achieve in a season if they decrease their points allowed by an average of 3 points per game?**
+0.9 more wins in a season
+
+
+**TASK 3.1.5--Based on your answers above, does it seem that a team should focus more on improving its offense or improving its defense?**
+It seams that a team should focus more on improving their offense because for each point they score, they get .5 more wins, while each point they don't allow only achieves .3 more wins
+
+
+**TASK 3.1.6--Are the data analyzed for this study observational or experimental?**
+The data analyzed is from an observational study, because the NFL games were not manipulated on or changed in anyway to become an experiement. We are simply just observing the data analyzed from NFL games played.
+
+
+
+
+#### Patriots/Chargers
+
+
+**TASK 3.2.1--Use the model to predict the number of wins for the 2016 New England Patriots, who scored 441 points and allowed 250 points in their 16 games.**
+The predicted number of wins for the 2016 New England patriots is 12.69 
+441/16 = 27.5625 and 250/16 = 15.625
+3.6 + (.5x27.5625) - (.3x15.625) = 12.69375
+
+The patriots actually won 14 games in 2016.
+**TASK--Determine the residual from this model, and interpret what this means.**
+The residual is 14-12.69375 = 1.30625
+This means that the patriots achieved 1.30625 more wins than our model predicted.
+
+The largest negative residual value from this model for the 2016 season belongs to the San Diego Chargers, with a residual value of -3.48 games.  
+**TASK 3.2.2--Interpret what this residual means.**
+The residual for the San Diego chargers of -3.48 means that our model predicted for the Chargers to win 3.48 more games than they actually did in real life.
+
+
+
+## 4. Handwriting and sex
+
+
+The dataset **Handwriting** contains survey data from a sample of 203 statistics students at Clarke University.  Each student was given 25 handwriting specimens and they were to guess, as best they could, the sex (male/female) of the person who penned the specimen.  Each specimen was a handwritten address, as might appear on the envelope of a letter.  There were no semantic clues in the specimen that could tip off the author's sex.  
+
+The survey was repeated two times--the second time was the same 25 specimens given in a randomly new order.  
+
+**TASK 4.1.1--Use the code chunk below to load the data into the work environment**
+```{r}
+data("Handwriting")
+```
+
+One variable given in the **Handwriting** dataset is *Survey2*, which records the percent correct that each individual had on the second survey. 
+
+**TASK 4.1.2--Construct a histogram of the variable *Survey2* **
+```{r}
+# hint, modify the code below
+gf_histogram( ~ Survey2, data = Handwriting)
+```
+**TASK 4.1.3--Discuss what the histogram tells you about the percent correct on the second survey**
+The histogram shows that the majority of people who took the second survey ended up getting around 55-75% correct.
+
+
+
+**TASK 4.1.4--Do you think that the subjects' guesses are better at guessing the author's sex than a mere 50-50 coin flip would be?**
+Yes, I do think the subjects' guesses are better at guessing than a coin flip would be because the mean percentage seems to be at least more than 60% correct when the subject guesses, compared to 50% correct when flipping a coin.
+
+
+
+Say we choose to model *Survey2* using a normal distribution: N(mu1, sigma1).  The fitted model would use the sample mean, x-bar, and the sample standard deviation, s.
+
+**TASK 4.1.5--Compute the sample statistics for the fitted model**
+```{r}
+# hint, use mean() or sd() or favstats()
+favstats(~ Survey2, data=Handwriting)
+```
+
+**TASK 4.1.6--Write the fitted model**
+N(65.0303, 9.994369)
+Yhat = 65.0303
+
+**TASK 4.1.7--Construct an appropriate plot of the residuals for the normal model of *Survey2***.
+```{r}
+# hint, modify the code below to add a variable for the residuals to the dataset 'Handwriting'.  
+sample_mean <- 65.0303# You can then plot the residuals.
+Handwriting$residuals <- Handwriting$Survey2 - sample_mean
+gf_histogram( ~Handwriting$residuals, data=Handwriting)
+
+```
+
+
+**TASK 4.1.8--Assess when our model is better than a coin-flipping model by performing a one-sample t-test to see if the true mean is more than 50 (hint: first, write your hypotheses)**
+
+
+```{r}
+# Hint, modify the code below
+t.test( ~ Survey2, mu = 50, alternative = "greater", data = Handwriting)
+```
+
+
+**TASK 4.1.9-- Give the conclusion in context to the one-sample t-test you performed above.**
+The conclusion from the one sample t-test is that our p value is extremely close to zero and less than .05 meaning that we can reject the null hypothesis and accept the alternative hypothesis that the true mean of the data will be greater than 50. I am 95% confident that the true mean will be between 63.85 and infinity(100 for this example).
+
+
+
+Suppose we want to compare the ability of men and women students in guessing the sex of authors of handwriting samples. The variable Gender indicates the sex of the respondent (0 = male and 1 = female). Note that you may need to tell R that the variable Gender should be treated as categorical by using factor(Gender) in your code.
+
+**TASK 4.2.1--Construct an appropriate plot to visualize the differences between guessing abilities of men and women students**
+```{r}
+# hint, use the code gf_boxplot() as your starting point
+gf_boxplot(Survey2 ~ factor(Gender), data=Handwriting)
+```
+
+**TASK 4.2.2--Discuss what the plot tells you**
+The plot shows that women had a higher average number of correct answers on the survey than the men's average number of correct answers
+
+
+Say we choose to model the responses of the men and women separately using two normal distributions.  
+**TASK 4.2.3--Compute the necessary summary statistics to fit the model**
+```{r}
+# hint, use mean() or sd() or favstats()
+favstats(Survey2 ~ factor(Gender), data=Handwriting)
+```
+
+**TASK 4.2.4--Give the fitted model**
+N0(61.75281, 11.296903)  Yhat = 61.75281
+N1(67.70642, 7.882591)   Yhat = 67.70642
+
+**TASK 4.2.7--Assess if this model is better than using a single shared normal distribution model by performing a two-sample t-test**
+```{r}
+# Hint, modify the code below
+t.test( Survey2 ~ Gender, alternative = "two.sided", data = Handwriting)
+```
+
+
+**TASK 4.2.8-- Give the conclusion in context.  Detail which model you would choose and why.**
+Given that the p value is 0, we can reject the null hypothesis and accept the alternative hypothesis.The mean difference between male and female scores is between -8.75 and -3.16. I personally would utilize the t test if the experiment was randomized because then there could possibly be a cause and effect statement to be made. 
+
+
+## Sparrows
+
+ Consider the dataset **Sparrows** from the Stat2Data package.  It contains observations, including weight (g) and wing length (mm) for a sample of Savannah sparrows found at Kent Island, New Brunswick, Canada.  
+
+**TASK 5.1--Use the code below to load the data and fit a linear model for predicting weight from wing length**
+```{r}
+data("Sparrows")  # load the data
+sparrow_model <- lm(Weight ~ WingLength, data = Sparrows) # fit the simple linear regression model
+summary(sparrow_model)  # display information about the model
+```
+
+**TASK 5.2--Interpret the slope of the least squares regression line in context**
+For every mm in wing length added, the weight increases by .4674 grams.
+
+
+**TASK 5.3--What is the intercept of the least squares regression line?**
+The intercept is 1.36549, which means that if the wing length was 0, the weight would be 1.36549 grams.
+
+
+**TASK 5.4--Suppose we observe a bird with wing length of 25mm.  Find the predicted weight for this bird.**
+1.36549 + .4674(25)
+= 1.8223 grams
+
+
+
+
+

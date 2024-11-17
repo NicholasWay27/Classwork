@@ -1,0 +1,347 @@
+---
+title: "Stat 300 Homework 7"
+author: "Nicholas Way"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+  html_notebook: default
+---
+
+This homework is based on exercises from Chapter 5 in The Stat2 textbook. You may need to read the relevant problems in the text in order to complete this assignment. Write your answers and include your notes in this document, and submit as a pdf or html online in the Canvas HW Quiz.
+
+**TASK** load all the packages that we are likely to need for this assignment:
+
+```{r, include = F}
+library(Stat2Data)
+library(tidyverse)
+library(mosaic)
+library(ggformula)
+```
+
+# 1. Data-free problems
+
+This section is based on problems 1, 2, 3, 12, 15, 17, 19, and 21.
+
+### 1.1: True/ False 
+
+For each of the statements below, indicate whether it is true or false.
+
+**TASK 1.1.1** Randomly selecting units from populations and performing an ANOVA allow you to generalize from the samples to the population.
+  
+  **Response:** False
+  
+**TASK 1.1.2** In datasets in which there was no random selection but there was random assignment of treatment levels, you can still use ANOVA results to generalize from samples to population.
+  
+  **Response:** True
+  
+**TASK 1.1.3** If the dataset does not meet the independence condition for the ANOVA model, a transformation might improve the situation.
+  
+  **Response:** False
+  
+### 1.2: Short answer
+
+A study was designed to answer the question 'is there a relationship between the type of music teenagers like and their tendency to exceed the speed limit?'.  For this question, the response is the number of times a person reported driving over 8- mph in the last year.  Random samples were taken from four group of students at a large high school: (1) those who described their favorite music as acoustic/pop; (2) those who preferred mainstream rock; (3) those who preferred hard rock; and (4) those who preferred heavy metal.  
+
+**TASK 1.2.1** Results showed that, on average, those who preferred heavy metal reported more frequent speeding.  Give at least two different reasons why it would be wrong to conclude that listening to heavy metal causes teens to drive fast.
+  
+  **Response:** Correlation does not include causation, just because there may be a high correlation between heavy metal and speeding in this data, does not mean that listening to heavy metal causes students to speed. Another reason is that there may be cofounding variables, or other variables that are associated with both heavy metal music preference and speeding behavior, which could be responsible for the observed relationship. 
+  
+**TASK 1.2.2** What kinds of generalizations from this study *are* justified?  Be specific if you mention a population, describe what that population is in context.
+  
+  **Response:** Based on this study, it would be justified to make generalizations about the relationship between music preference and self-reported speeding behavior among teenagers at the specific high school from which the samples were taken. We can say that among the students at this high school who were surveyed, there is a relationship between music preference and the tendency to exceed the speed limit. Specifically, students who preferred heavy metal reported more frequent speeding than those who preferred other types of music. We cannot generalize other high schools or populations.
+  
+### 1.3: Comparing Fonts
+
+Suppose an instructor wants to investigate whether the font used on an exam affects student performance as measured by the final exam score.  She uses four different fonts (Times, Courier, Helvetica, Comic Sans) and randomly assigns her 40 students to one of those four fonts.  
+
+**TASK 1.3.1** Identify the explanatory and response variables in this study.
+  
+  **Response:** Explanatory variable is the font used, and the response variable is the final exam score
+  
+**TASK 1.3.2** Is this an observational study or a randomized experiment?  Explain how you know.
+  
+  **Response:** This is a randomized experiment because in this scenario, the instructor is not simply observing font preferences and exam performance, but rather she is intentionally manipulating the font used on the exam by randomly assigning students to one of four fonts.
+  
+**TASK 1.3.3** Even though the subjects in this study were not randomly selected from a population, it's still appropriate to conduct an analysis of variance.  Explain why.
+  
+  **Response:** In this case, the instructor has randomly assigned the 40 students to one of four fonts, which means that each student is assigned to only one font group. While the subjects in this study were not randomly selected from a larger population, the random assignment of students to the font groups helps to ensure that each group is comparable on all other relevant characteristics, except for the font used on the exam. This random assignment helps to reduce the potential for confounding variables that could influence exam performance. Thus, an ANOVA can be used to investigate whether there are any significant differences in exam scores across the four font groups, with the null hypothesis being that there is no difference in mean exam scores across the four groups. If there is a significant difference, the instructor can then conduct follow-up tests to determine which font groups differ from each other in terms of exam scores.
+  
+**TASK 1.3.4** What are the units in this experiment?
+  
+  **Response:** The units in this experiment are the individual students, and the outcome variable is measured in exam score units, while the independent variable or factor is measured in font types.
+  
+**TASK 1.3.5** What are the treatments?
+  
+  **Response:** In this experiment, the four treatments are the different fonts used on the exam (Times, Courier, Helvetica, Comic Sans).
+  
+**TASK 1.3.6** What would the researchers have to do to ensure this experiment is balanced?
+  
+  **Response:** To ensure that this experiment is balanced, the researchers would need to randomly assign an equal number of students to each of the four font groups. In other words, each font group should have an equal number of students assigned to it. This would help to ensure that any differences in exam scores across the four font groups are not due to an unequal distribution of student characteristics or abilities across the groups. The researchers should ensure that the exam is the same across all four font groups in terms of difficulty, content, and any other relevant factors. This would help to ensure that any observed differences in exam scores across the groups are not due to differences in exam difficulty or content. Tthe researchers should take steps to control for any other potential sources of variability that could influence exam scores, such as testing conditions, time of day, or any other environmental factors. 
+  
+**TASK 1.3.7** Determine what the degrees of freedom would be for each of the entries that would appear in the ANOVA table for this setting.
+  
+  **Response:** The degrees of freedom for each of the entries in the ANOVA table for this setting would be:
+
+Between groups: df = 3
+Within groups: df = 36
+Total: df = 39
+  
+**TASK 1.3.8** Assume that the ANOVA F-test yields a p-value of 0.003.  Each of the following statements are *false*.  Explain why.
+  
+**TASK 1.3.8.1** The probability is 0.003 that the four groups have the same mean score.
+  
+  **Response:** A p-value of 0.003 means that there is strong evidence against the null hypothesis of equal means, but it does not necessarily mean that the probability of the null hypothesis being true is 0.003. 
+   
+**TASK 1.3.8.2** The data provide very strong evidence that all four fonts produce different mean scores.
+  
+  **Response:**  A small p-value does not necessarily mean that all four fonts produce different mean scores. It only means that there is strong evidence that at least one of the four fonts produces a different mean score than the others. However, it is possible that some of the fonts have similar mean scores, and the observed differences are due to chance.
+   
+**TASK 1.3.8.3**The data provide very little evidence that at least one of these fonts produces a different mean score than the others.
+  
+  **Response:**  A small p-value indicates that there is strong evidence that at least one of these fonts produces a different mean score than the others. Therefore, the data provide strong evidence against the null hypothesis of equal means, and it is unlikely that the observed differences are due to chance.
+   
+**TASK 1.3.8.4** The data do not allow for drawing a cause-and-effect conclusion between font and exam score.
+  
+  **Response:** ANOVA is a statistical method that can be used to test for differences in means across multiple groups. However, it does not establish causality between font and exam score. There could be other variables that affect exam performance, such as student ability, motivation, or study habits, that are not controlled for in this experiment. 
+    
+**TASK 1.3.8.5** Conclusions from this analysis can be generalized to the population of all students at the instructor's school.
+  
+  **Response:** The conclusions from this analysis can only be generalized to the population of students who participated in this study, which is a sample of convenience rather than a random sample. 
+    
+
+# 2. North Carolina Births
+
+This section is based on problems 11, 59, and 60.
+
+In your HW 6 assignment you were introduced to the dataset **NCbirths**, which contains data on a random sample of 1450 birth records in the state of North Carolina in the year 2001.  In the study, the response was the birth weight of a newborn infant, and the factor of interest was the racial/ethnic group of the mother.  In this assignment, we look at this dataset using ANOVA instead of linear regression with indicator variables.
+
+**TASK 2.1**  Explain why random assignment is impossible, and how this impossibility limits the scope of inference:  Why is inference about cause not possible?
+  
+  **Response:** In the case of the NCbirths dataset, the racial/ethnic group of the mother is not a treatment that is assigned by the researcher, but rather an inherent characteristic of the mother. Therefore, random assignment is impossible in this study. The impossibility of random assignment limits the scope of inference because it precludes the possibility of establishing a cause-and-effect relationship between the racial/ethnic group of the mother and the birth weight of the newborn. There may be other variables that affect birth weight, such as maternal age, maternal education, prenatal care, and genetic factors, that are not controlled for in this study. Therefore, while the study can identify statistical associations between race/ethnicity and birth weight, it cannot establish causality.
+
+**TASK 2.2**  Under what circumstances would inference from samples to populations be justified?  Were the requirements for this kind of inference satisfied?
+  
+  **Response:** In the case of the NCbirths dataset, the sample was selected randomly from birth records in the state of North Carolina in the year 2001. Therefore, the sample is representative of the population of birth records in North Carolina in that year. However, the sample size of 1450 is relatively small compared to the total number of births in North Carolina in 2001, so the precision of the estimates may be limited. While the requirements for inference from samples to populations were partially satisfied in this study, the relatively small sample size may limit the precision of the estimates, and therefore the generalizability of the conclusions to the entire population of birth records in North Carolina in 2001.
+
+For the purposes of this analysis, we will consider four racial groups: white, black, Hispanic, and other (which includes Asian, Hawaiian, and Native American).  Use the variable *MomRace*, which gives the races with descriptive categories.  (the variable *RaceMom* uses on numbers)
+ 
+**TASK 2.3**  Produce graphical displays of birth weights ( in ounces) separated by mothers' racial group.  Comment on both similarities and differences that you observe in the distributions of birth weight among the groups.
+  
+  **Response:** All races have about the same center, but the races white and black seem to be skewed more to the left with potential outliers while the races of hispanic and other are more symmetrical and balanced.
+ 
+ 
+```{r}
+library(ggplot2)
+library(dplyr)
+
+
+data("NCbirths")
+
+
+NCbirths$MomRace <- factor(NCbirths$MomRace, levels = c("white", "black", "hispanic", "other"))
+
+
+ggplot(NCbirths, aes(x = MomRace, y = BirthWeightOz)) +
+  geom_boxplot() +
+  xlab("Mothers' Racial Group") +
+  ylab("BirthWeightOZ (ounces)") +
+  ggtitle("Distribution of Birth Weight by Mothers' Racial Group")
+
+```
+**TASK 2.4**  Report the sample sizes, sample means, and sample standard deviations of birth weights for each racial group by completing the table below:
+ 
+| Group    | sample size | Sample mean | sample standard deviation |
+|:--------:|:-----------:|:-----------:|:-------------------------:|
+| black    |    332      |    110.5633 |                  23.39      | 
+| white    |    906      |    117.8720 |                  22.51      | 
+| hispanic |    164      |    118.5183 |                  18.16      | 
+| other    |    048      |    117.1458 |                  17.59      | 
+
+```{r}
+
+
+
+agg <- aggregate(BirthWeightOz ~ MomRace, data = NCbirths, FUN = function(x) c(n = length(x), mean = mean(x), sd = sd(x)))
+
+
+agg
+
+```
+
+**TASK 2.5**  Explain why it's not sufficient to examine the four sample means, note that they all differ, and conclude that all groups have birth weight distributions that differ from each other.
+  
+  **Response:** The sample means alone do not provide information about the variability within each group or the overlap between the groups. It is possible for the sample means to be different even if the birth weight distributions have significant overlap.
+
+**TASK 2.6**  Comment on whether the conditions of the ANOVA procedure and F-test are satisfied with these data.
+  
+  **Response:** The normal q-q plot seems to be decently linear but has a tail at the bottom left that is a little alarming. The residuals vs leverage plot is showing that conditions are met. The residuals vs fitted plot shows that all races are centered at 0, therefore the conditions are met.
+
+```{r}
+modelNC <- lm(BirthWeightOz ~ MomRace, data = NCbirths)
+mplot(modelNC, which = 1)
+mplot(modelNC, which = 2)
+mplot(modelNC, which = 5)
+
+```
+
+
+**TASK 2.7**  Conduct an ANOVA.  Complete the ANOVA table below and interpret the results in context.
+
+
+|  Source  | Df          | Sum Sq      | Mean Sq   | F value | P-value |
+|:--------:|:-----------:|:-----------:|:---------:|:-------:|:-------:|
+| MomRace  |    3      |    14002      |    4667    |   9.528   |    3.12e-06  |  
+| Residuals|    1446   |    708332     |    490     |           |              |
+
+The high F value of 9.528 and the extremely low p value is enough evidence to state that there is a statistically significant difference in Birth Weights between the 4 different races of the mothers.
+
+```{r}
+model <- aov(BirthWeightOz ~ MomRace, data = NCbirths)
+summary(model)
+```
+
+
+# 3. Mouse Serotonin
+
+This section is based on problems 27 and 37.
+
+Serotonin is a chemical that influences mood balance in humans.  But how does it affect mice?  Scientists genetically altered mice by 'knocking out' the expression of a gene, tryptophan hydroxylase 2 (Tph2), that regulates serotonin production.  With careful breeding, the scientists produced three types of mice that we label as "Minus" for Tph2 -/-, "Plus" for Tph2 +/+, and "Mixed" for Tph2 +/-.  The variable *Genotype* records Minus/Plus/Mixed.  The variable *Contacts* is the number of social contacts that a mouse had with other mice during an experiment and the variable *Sex* is "M" for males and "F" for females.  These variables are collected in the dataset MouseBrain.
+
+**TASK 3.1**  Produce boxplots and calculate descriptive statistics to compare contacts across the three genotypes.  Comment on what these reveal.
+
+| Group    | sample size | Sample mean | sample standard deviation |
+|:--------:|:-----------:|:-----------:|:-------------------------:|
+| Minus    |    10     |    12.7      |                  4.55      | 
+| Plus     |    19      |    19.26      |                  4.79      | 
+| Mixed    |    19      |    17.52      |                  5.46      |
+
+These reveal that the minus genotype does not have a large sample size and that its sample mean is smaller than the other two genotypes. Both plus and minus seem to have an outlier. The mixed genotype has the highest sample mean.
+
+```{r}
+data("MouseBrain")
+
+boxplot(Contacts ~ Genotype, data = MouseBrain)
+
+
+contacts <- subset(MouseBrain, select = c(Genotype, Contacts))
+
+
+aggg <- aggregate(Contacts ~ Genotype, data = contacts, FUN = function(x) c(sample_size = length(x), sample_mean = mean(x), sample_sd = sd(x)))
+
+aggg
+```
+
+**TASK 3.2**  Verify that the conditions required for ANOVA are met for these data.
+  
+  **Response:** The normal q-q plot seems to be linear centered along the line and seems to have no tails. The residuals vs fitted plot shows that all genotypes are centered at 0, therefore the conditions are met.
+
+```{r}
+modelM <- lm(Contacts ~ Genotype, data = MouseBrain)
+mplot(modelM, which = 1)
+mplot(modelM, which = 2)
+
+```
+
+**TASK 3.3**  Conduct a one-way ANOVA.  Report the ANOVA table and interpret the results.  Do these data provide strong evidence that the number of contacts differs based on the type of mouse?  Explain.
+
+  
+  **Response:** The high F value of 5.66 and low p value of .00642 means that there is a statistically significant difference in the number of contacts between the three genotypes.
+
+|  Source  | Df          | Sum Sq      | Mean Sq   | F value | P-value |
+|:--------:|:-----------:|:-----------:|:---------:|:-------:|:-------:|
+| Genotype |    2      |    285.4      |    142.7    |   5.66   |    .00642  |  
+| Residuals|    45      |    1134.5      |    25.21    |         |         |
+
+```{r}
+fit <- aov(Contacts ~ Genotype, data = contacts)
+
+
+summary(fit)
+```
+
+# 4. Meniscus
+
+This section is based on problems 38, 40, and 57.
+
+An experiment was conducted to compare three different methods of repairing a meniscus (cartilage in the knee).  Eighteen lightly embalmed cadaveric specimens were used, with each being randomly assigned to one of the three treatments: vertical suture, meniscus arrow, FasT-Fix.  Each knee was evaluated on three different response variables: load at failure, stiffness, and displacement.  The data are located in **Meniscus**.  
+
+### 4.1: Concentrate on the *stiffness* response variable.  
+
+**TASK 4.1.1** Give the hypotheses that would be tested in an ANOVA procedure for this dataset.
+  
+  **Response:** Null Hypothesis (H0): The mean values of stiffness are the same across all three meniscus repair methods.
+
+Alternative Hypothesis (HA): At least one of the mean values of stiffness is different across the three meniscus repair methods.
+  
+**TASK 4.1.2** Show that the conditions for ANOVA are met for these data.
+  
+  **Response:** The normal q-q plot seems to be linear along the line and has no tails. The residuals vs fitted plot is centered at 0 for each method. Therefore, the conditions are met to run anova.
+  
+```{r}
+data("Meniscus")
+
+modelStiff <- aov(Stiffness ~ factor(Method), data = Meniscus)
+mplot(modelStiff, which = 1)
+mplot(modelStiff, which = 2)
+```
+
+**TASK 4.1.3** Conduct an ANOVA.  Do the data provide strong evidence that the mean value of *Stiffness* differs based on the type of meniscus repair?  Explain.  
+  
+  **Response:** Based on the low p value below .05 and the high F value, there is enough evidence to suggest a significant difference of stiffness between the three different methods.
+  
+  
+```{r}
+fit_stiffness <- aov(Stiffness ~ factor(Method), data = Meniscus)
+
+summary(fit_stiffness)
+```
+  
+### 4.2: Now concentrate on the *displacement* variable.  
+
+**TASK 4.2.1** Give the hypotheses that would be tested in an ANOVA procedure for this dataset.
+  
+  **Response:** Null Hypothesis (H0): The mean values of displacement are the same across all three meniscus repair methods.
+
+Alternative Hypothesis (HA): At least one of the mean values of displacement is different across the three meniscus repair methods.
+  
+**TASK 4.2.2** Show that the conditions for ANOVA are met for these data.
+  
+  **Response:** The normal q-q plot seems to be linear along the line and has no tails. The residuals vs fitted plot is centered at 0 for each method. Therefore, the conditions are met to run anova.
+  
+```{r}
+modelDis <- aov(Displacement ~ factor(Method), data = Meniscus)
+mplot(modelDis, which = 1)
+mplot(modelDis, which = 2)
+```
+
+**TASK 4.2.3** Conduct an ANOVA.  Do the data provide strong evidence that the mean value of *displacement* differs based on the type of meniscus repair?  Explain.  
+  
+  **Response:** With a low p value below .05 and a high F value, there is enough evidence to say that there is a significant difference between the displacement levels of the three methods.
+  
+  
+```{r}
+fit_displacement <- aov(Displacement ~ factor(Method), data = Meniscus)
+
+summary(fit_displacement)
+```
+
+### 4.3: Finally, consider the pressure that the repair could handle (*FailureLoad*).
+
+**TASK 4.3.1** Give the hypotheses that would be tested in an ANOVA procedure for this dataset.
+  
+  **Response:** Null Hypothesis (H0): The mean values of failure load are the same across all three meniscus repair methods.
+
+Alternative Hypothesis (HA): At least one of the mean values of failure load is different across the three meniscus repair methods.
+  
+**TASK 4.3.2** Check to see if the conditions for the ANOVA procedure and F-test are satisfied with these data.  Discuss why some statisticians might choose not to complete the ANOVA procedure for this response variable.
+  
+  **Response:** The normal q-q plot seems to be linear along the line and has no tails. The residuals vs fitted plot is centered at 0 for each method. Therefore, the conditions are met to run anova. Some statisticians may decide not do complete the ANOVA table since the last two conditions and ANOVA tests suggested a significant staistical difference in the methods. That must mean that the third method is significantly different as well.
+  
+```{r}
+modelF <- aov(FailureLoad ~ factor(Method), data = Meniscus)
+mplot(modelF, which = 1)
+mplot(modelF, which = 2)
+```
+  
+  

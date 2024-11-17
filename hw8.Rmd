@@ -1,0 +1,347 @@
+---
+title: "Stat 300 Homework 8"
+author: "Your Name Here"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+  html_notebook: default
+---
+
+This homework is based on exercises from Chapters 5 and 6 in The Stat2 textbook. You may need to read the relevant problems in the text in order to complete this assignment. Write your answers and include your notes in this document, and submit as a pdf or html online in the Canvas HW Quiz.
+
+**TASK** load all the packages that we are likely to need for this assignment:
+
+```{r, include = F}
+#rm(list = ls())
+library(Stat2Data)
+library(tidyverse)
+library(mosaic)
+library(ggformula)
+library(tinytex)
+library(ggplot2)
+```
+
+# Chapter 5 problems
+
+## 1. Data-free questions
+
+**TASK 1.1**  What is the main purpose of an ANOVA model in the setting of chapter 5?
+  
+  **Response:** The main purpose is to compare group means while taking into consideration the variability in the response values within groups
+
+**TASK 1.2**  Describe two plots that you could use to assess the conditions of a one-way ANOVA model.
+  
+  **Response:** Two plots that can be use to assess the conditions of a one-way anova model are the boxplot and the qq plot.
+
+**TASK 1.3**  Which of the below conditions are in fact conditions for the one-way ANOVA model? (make the real conditions bold by enclosing them with **asterisks**)
+  - **Error terms have the same standard deviation.**
+  - Error terms are all positive.
+  - **Error terms are independent.**
+  - **Error terms follow a normal distribution.**
+  
+**TASK 1.4**  One diagnostic plot that you will use in this assignment is the plot of log(SD) versus log(mean) for the different groups in your dataset.  
+
+  - What characteristic of your data would lead you to consider making such a plot?
+  
+  **Response:** If the data exhibits a pattern in the residual plot, where the residuals are not randomly distributed and the variance of the residuals appears to change across the levels of the independent variable, then it suggests that the assumption of homoscedasticity is violated. 
+  
+  - If the plot exhibits a straight line, what does the slope suggest for your ANOVA analysis?
+  
+  **Response:** If the plot of log(SD) versus log(mean) exhibits a straight line, it suggests that the variances are proportional to the means. The slope of the line indicates the degree to which the variances are proportional to the means. 
+  
+## 2. Hawks
+
+This section is based on problems 5.32, 5.43, and 5.49 in your text.
+
+Students and faculty in Cornell College in Mount Vernon, Iowa, collected data over many years at the hawk blind at Lake MacBride, near Iowa City, Iowa.  They captured over a thousand birds, recording many different measurements for each bird before releasing it.  The dataset (Hawks) is a subset of the original dataset, containing observations for red-tailed, sharp-shinned, and Cooper's hawks.
+
+In this portion of the assignment we focus on *Weight* as the response variable.
+
+**TASK 2.1**  Create dotplots to compare the values of weight between the three species.  Do you have any concerns about the use of ANOVA based on the dotplots?  Explain.
+   
+```{r}
+data("Hawks")
+HawksO <- Hawks %>%
+  drop_na(Weight)
+  plot(Weight ~ Species, data = HawksO)
+```
+   
+  **Response:** I have concerns that the outlier condition may not be met since there are multiple outliers present across the three species.
+
+**TASK 2.2** Compute the standard deviation of the weights for each of the three species groups.  Do you have any concerns about the use of ANOVA based on the standard deviations?  Explain.
+```{r}
+sd_RT <- sd(HawksO$Weight[HawksO$Species == "RT"])
+sd_SS <- sd(HawksO$Weight[HawksO$Species == "SS"])
+sd_CH <- sd(HawksO$Weight[HawksO$Species == "CH"])
+
+print(sd_CH)
+print(sd_RT)
+print(sd_SS)
+```
+  
+  **Response:** After omitting the NA values in the dataset, it is alarming to me that all three of the standard deviations for the species are above 80, with the highest standard deviation being 189.2
+
+
+**TASK 2.3** Plot log(sd) verus log(mean) for the three groups.  Does the plot suggest a line?  
+```{r}
+log_mean <- log(tapply(HawksO$Weight, HawksO$Species, mean))
+log_sd <- log(tapply(HawksO$Weight, HawksO$Species, sd))
+
+# Combine the data into a data frame
+MvsS <- data.frame(Species = unique(HawksO$Species), log_mean, log_sd)
+
+# Plot the data
+ggplot(MvsS, aes(x = log_mean, y = log_sd, color = Species)) +
+  geom_point() +
+  xlab("Log of Mean Weight") +
+  ylab("Log of Standard Deviation")
+```
+
+  
+  **Response:** The plot does suggest a line, as the log mean weight increases, so does the log standard deviation among the three species.
+
+**TASK 2.4** Fit a line and report the estimated slope.  
+```{r}
+LogModel <- lm(log_sd ~ log_mean, data = MvsS)
+print(LogModel)
+```
+  
+  **Response:** The estimated slope is .4298
+
+**TASK 2.5** Compute p = 1- slope.  What transformation, if any, is suggested?
+  
+  **Response:**  p = .5702 a square root is suggested
+
+**TASK 2.6** Apply the transformation you suggested in part 5.  Report the sample means and standard deviations for each group in the transformed scale.
+```{r}
+Hawks$SqRtWeight <- sqrt(Hawks$Weight)
+favstats(SqRtWeight ~ Species, data = Hawks)
+```
+  
+  **Response:** The sample means are 20.144, 32.94, 11.92. The standard deviations are 3.063, 3.861, and 2.422
+
+**TASK 2.7** Make parallel boxplots of the transformed data by group.  What do these plots indicate about the relationship between the transformed mean weights in the three groups?
+```{r}
+gf_boxplot(SqRtWeight ~ Species, data = Hawks)
+```
+  
+  **Response:** There are is a definite difference in the transformed means in each group. The weights from smallest to largest are SS, CH and RT.
+
+**TASK 2.8** What do the parallel boxplots indicate about whether an ANOVA model would be appropriate?
+  
+  **Response:** The standard deviations are now more similar and the distributions are still skewed and have outliers
+
+## 3. Fantasy Baseball
+
+This section is based on problems 5.66 to 5.68 in your text.
+
+A group of friends who participate in a 'fantasy baseball' league became curious about whether some of them take significantly more or less time to make their selections in the fantasy draft, through which they select players.  The dataset **FantasyBaseball** reports the times (in seconds) that each of the eight friends (identified by their initials) took to make their 24 selections.  The data table is also printed on page 254 of your text.
+
+The data, as available in the Stat2Data package, is in 'wide format', but for your analysis you want it to be in 'long format'.  
+
+**TASK 3.0** Use the code chunk below to read the data and format it.
+
+```{r}
+data("FantasyBaseball")
+Baseball <-
+  FantasyBaseball %>%
+  gather(key = person, value = time, DJ, AR, BK, JW, TS, RL, DR, MF)
+head(Baseball)
+```
+
+
+**TASK 3.1** Produce boxplots and calculate descriptive statistics to compare the selection times for each participant.  Comment on what they reveal.  Also identify (by initials) which participant took the longest and which took the shortest time to make their selections.
+```{r}
+ggplot(Baseball, aes(x = person, y = time)) +
+   geom_boxplot()
+Baseball_summary <- Baseball %>%
+  group_by(person) %>%
+  summarize(min = min(time),
+            q1 = quantile(time, 0.25),
+            median = median(time),
+            mean = mean(time),
+            q3 = quantile(time, 0.75),
+            max = max(time),
+            sd = sd(time),
+            n = n())
+Baseball_summary
+```
+  
+  **Response:** The initials that took the minimum time of 1 were MF and the initials that took the maximum time were JW
+
+**TASK 3.2** Conduct a one-way ANOVA to assess whether the data provide evidence that averages as far apart as these would be unlikely to occur by chance alone if there really were no differences among the participants in terms of their selection times.  For now, assume all conditions are met.  Report the ANOVA table, test statistic, and P-value.  Summarize your conclusions in context.
+```{r}
+
+anova <- aov(time ~ person, data = Baseball)
+summary(anova)
+```
+  
+  **Response:** According to the anova test, there is a high F value of 10.89 and a p value of less than .05. This means that there is a significant difference in the averages of time between the different people.
+
+**TASK 3.3** Use Tukey's HSD procedure to assess which participants' average selection times differ significantly from which others.  
+```{r}
+TukeyNonaddPlot(time ~ person + Round, data = Baseball)
+TukeyHSD(anova)
+```
+  
+  **Response:** There are some interactions that have a significant difference in time where they have a p value of less than .05(ex: JW-DR)
+
+**TASK 3.4** Produce a normal probability plot of the residuals for the ANOVA model you fit in part 3.  Comment on the appropriateness of the ANOVA model for these data.
+```{r}
+residuals <- residuals(anova)
+qqnorm(residuals)
+qqline(residuals)
+```
+  
+  **Response:** The q-q plot is mostly linear along the line, but has a large curved tail at the end to the right, this is alarming and suggests that the conditions for an anova may not be met.
+
+**TASK 3.5** Transform the selection times using the log transformation.  Repeat your analysis of the data and report your findings (ANOVA table, test statistic, p-value and conclusion in context).  
+```{r}
+anova2 <- aov(log(time) ~ person, data = Baseball)
+summary(anova2)
+```
+  
+  **Response:** The anova test with a log transformation on the variable "time" produces a high f statistic of 12.99 and an extremely low p value of nearly 0. Therefore, there is a significant difference between the times of the people.
+
+**TASK 3.6** Use Tukey's HSD to assess which participant's average selection times differ significantly from which others, still using the transformed data.
+```{r}
+TukeyNonaddPlot(log(time) ~ person + Round, data = Baseball)
+TukeyHSD(anova2)
+```
+  
+  **Response:** There are some interactions that have a significant difference in time where they have a p value of less than .05(ex: TS-DJ)
+
+
+# Chapter 6 problems
+
+This section is based on problems from chapter 6 in your text: 6.1, 6.4, 6.6, 6.8, 6.10, 6.12--6.16, 6.18, 6.28, 6.30, and 6.34
+
+
+## 4. True or false
+
+**TASK 4.1** In a randomized complete block study at least one of factors must be experimental (assigned randomly).
+  
+  **Response:** True
+
+**TASK 4.2** The conditions for the errors of the two-way additive ANOVA model are the same as the conditions for the errors of the one-way ANOVA model.
+  
+  **Response:** False
+
+**TASK 4.3** In a complete block design, blocks and treatments are crossed.  
+  
+  **Response:** False
+
+**TASK 4.4** Block designs result only from observing subjects several times, each time with a different treatment.
+  
+  **Response:** False
+
+### 5. Design
+
+For each of the study descriptions below, (a) give the response; (b); give the name of the two factors; (c) for each factor, tell whether it is observational or experimental, and the number of levels it has; and (d) tell whether the study is a complete block design.
+
+**TASK 5.1** Ten male and 10 female robins were randomly divided into groups of five.  Five birds of each sex were given a hormone in their diet; the other 5 of each sex were given a control diet.  At the end of the study, the researchers measured the calcium concentration in the plasma of each bird.  
+
+a. The response variable is calcium concentration in the plasma of each bird.
+b. The two factors are "diet" and "sex".
+c. "Diet" is an experimental factor with two levels: hormone and control. "Sex" is an observational factor with two levels: male and female.
+d. The study is not a complete block design since there is random assignment
+
+**TASK 5.2**  It is generally accepted that children with attention deficit and hyperactivity disorder tend to be particularly distracted by background noise.  About 20 years ago a study was done to test this hypothesis.  The subjects were all second-graders.  Some had been diagnosed as hyperactive; the other subjects served as a control group.  All the children were given sets of math problems to solve, and the response was their score on the set of problems.  All the children solved problems under two sets of conditions, high noise and low noise.   
+
+a. The response variable is the score on the set of math problems.
+b. The two factors are "diagnosis" and "noise level".
+c. "Diagnosis" is an observational factor with two levels: hyperactive and control. "Noise level" is an experimental factor with two levels: high and low.
+d. The study is a complete block study since both blocks of hyperactive and control are exposed to high and low noise.
+
+**TASK 5.3**  Researchers investigating appetite control measured the effect of two hormone injections, leptin and insulin, on the amount eaten by rats.  Male rats and female rats were randomly assigned to get one hormone shot or the other.   
+
+a. The response variable is the amount eaten by rats.
+b. The two factors are "hormone type" and "sex".
+c. "Hormone type" is an experimental factor with two levels: leptin and insulin. "Sex" is an observational factor with two levels: male and female.
+d. The study is not a complete block design since there is randomization
+
+### 6. Degrees of freedom
+
+**TASK 6.0** If you carry out a two-factor ANOVA (mean effects model) on a datset with Factor A at six levels and Factor B at three levels, with one observation per cell, how many degrees of freedom will there be for...
+
+1. Factor A?
+  
+  **Response:** 5
+
+2. Factor B?
+  
+  **Response:** 2
+
+3. Error?
+  
+  **Response:** 10
+
+## 7. River Iron
+
+Consider the river iron example that we saw in class and is also detailed in example 6.7 of your text.  It turns out these are actually rivers in New York. The data is called **RiverIron**.
+
+**TASK 7.1** Using the original scale for the iron concentrations, fit the two-way additive model *FE = River + Site + Error*.
+```{r}
+data("RiverIron")
+IronModel <- aov(Iron ~ River + Site, data = RiverIron)
+summary(IronModel)
+```
+
+**TASK 7.2**  Obtain a normal probability plot of the residuals. Is there any indication from this plot that the normality condition is violated?
+```{r}
+residuals2 <- residuals(IronModel)
+qqnorm(residuals2)
+qqline(residuals2)
+```
+  
+  **Response:** There is no indication that the conditions are not met. The line seems straight with no tails.
+
+**TASK 7.3** Obtain a plot of residuals versus fitted values. Is there any indication from the shape of this plot that the variation is not constant?  Are there pronounced clusters or unmistakable curvature to the plot?
+```{r}
+plot(IronModel, which = 1)
+```
+  
+  **Response:** The indication from the shape of this plot is that since the plot is curved and inconsistent, it can be inferred that the variation is not constant.
+
+**TASK 7.4** Finally look at the leftmost point and estimate the fitted value from the graph.  Explain why this one fitted value strongly suggests that the model is not appropriate.
+  
+  **Response:** The fitted value on the far most left is below 0, and it strongly suggests that the model is not appropriate since it is so far above the 0 residuals line, this suggest that the eqaul variance condition is not met.
+
+**TASK 7.5** We now graphically explore the data using Anscombe plots.  Note that there are three treatments in this study (much like the Frantic Fingers study from class).  Thus there will be three Anscombe plots for these data.  Create these three plots.
+```{r}
+UPRate <- RiverIron %>%
+  filter(Site == "Upstream") %>%
+  select(Iron)
+UP <- UPRate$Iron
+
+MSRate <- RiverIron %>%
+  filter(Site == "MidStream") %>%
+  select(Iron)
+MS <- MSRate$Iron
+
+DSRate <- RiverIron %>%
+  filter(Site == "DownStream") %>%
+  select(Iron)
+DS <- DSRate$Iron
+
+gf_point(UP ~ MS) %>% 
+  gf_lm(UP ~ MS) %>%
+  gf_abline(intercept = ~ 0, slope = ~1)
+lm(UP ~ MS)
+
+gf_point(UP ~ DS) %>% 
+  gf_lm(UP ~ DS) %>%
+  gf_abline(intercept = ~ 0, slope = ~1)
+lm(UP ~ DS)
+
+gf_point(DS ~ MS) %>% 
+  gf_lm(DS ~ MS) %>%
+  gf_abline(intercept = ~ 0, slope = ~1)
+lm(DS ~ MS)
+```
+
+**TASK 7.6** What are the slopes of the lines for each of these three plots and what do they tell you?
+  
+  **Response:** Since the slopes of the three lines are moderately different, it suggests that there is a lot of variability within the model. All slopes are positive, which suggests that as the explanatory variable increases, so does the response variable.
+

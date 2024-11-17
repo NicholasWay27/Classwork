@@ -1,0 +1,180 @@
+---
+title: "STAT 300: Homework Assignment 1"
+author: "Nicholas Way"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+
+```{r, echo = F, include = F}
+# clean-up R environment
+rm(list = ls())  
+
+# Load Packages 
+library(mosaic)
+library(ggformula)
+library(tidyverse)
+library(tinytex)
+
+# set your local path to the data here, and then remove the "#" symbol to uncomment it
+# state_data = read.csv("C:/Users/nicho/OneDrive/Desktop/Statistics/Stat 300/HW 1 Stat 300")
+library(readr)
+state_data <- read_csv("US _States.csv")
+
+```
+
+
+# Part 1: One categorical variable
+
+EnoughVeg
+
+**TASK 1.1--Introduction of the variable:**
+The variable of interest is EnoughVeg. This is a categorical variable with 2 levels, "Under75%" for states with less than 75% of a population that eats the daily recommended amount of vegetables and "Over75%" for states with at least 75% of a population that eats the daily recommended amount of vegetables. It categorizes states based on their percentage of residents who eat the daily recommended amount of vegetables.
+
+A reasonable research question is "Do the majority of states have more than 75% of people who eat the daily recommended amount of vegetables in their population?" The parameter of interest is p, using the population proportion would result in a hypothesis of :
+\begin{align*}
+H_0:p=0.50 \\
+ H_a:p>0.50
+ \end{align*}
+
+where p is the proportion of states that have at least 75% of residents who eat the daily recommended amount of vegetables.
+
+
+**TASK 1.2--Exploratory Data Analysis**
+Having a categorical variable means that the exploratory data analysis can be a bar chart along with a sample proportion. To verify that the sample size is large enough, $n\hat{p}$ and $n(1-\hat{p})$ should both be at least 10. 
+
+
+```{r}
+gf_bar( ~ EnoughVeg, data = state_data)
+tally( ~ EnoughVeg, data = state_data)
+```
+Based on my EDA, out of the 50 states, 38 or 76% of states have at least 75% of their population that east the daily recommended amount of vegetables. Assuming that these 50 states were a random sample from more states for the sake of the EDA, it can be inferred that there will be evidence supporting the alternative hypothesis. The conditions for performing inference are met, since $(.76)50 = 38$ and $(1-.76)50 = 12$ are both greater than 10.
+
+```{r}
+prop.test( ~ EnoughVeg, p = 0.5, alternative = "greater",data = state_data) 
+
+prop.test( ~ EnoughVeg, p = 0.5, alternative = "two.sided", data = state_data) 
+
+```
+**TASK 1.3--Inference and Conclusions**
+
+
+After performing a one sided hypothesis for one proportion, the p value is 0.0002035.This value tells us that if the true proportion of states with more than 75% of residents that eat enough veggies daily is 0.50, the chance of seeing a sample proportion of 0.76 from a sample of this size is 0.0002035. This indicates that our sample provides strong evidence against the null and in favor of the alternative. At a significance level of 0.05 we reject the null hypothesis and accept the alternative hypothesis.  We have strong evidence that a majority of states have more than 75% of residents that get enough vegetables daily.  
+
+
+
+# Part 2: One quantitative variable
+
+IQ
+
+**TASK 2.1--Introduction of the variable:**
+The variable of interest is IQ, the mean score of residents from each state in 2013. This is a quantitative variable that should always be between 1 and 200. I chose this variable because it is interesting to see the difference in intelligence between state lines. A reasonable research question would be "What is the state average IQ score of residents?" or "Is the average state IQ score less than 95?"\
+
+The first question could be answered with a confidence interval, while the second should be written as a hypothesis test involving $\mu$, the population mean IQ score, measured at the state level.
+\begin{align*}
+H_0:\mu=95 \\
+H_a:\mu<95
+\end{align*}
+
+
+**TASK 2.2--Exploratory Data Analysis**
+
+When using a quantitative variable, some tools to use could be dot plot, box plot, or histogram. I am choosing to make a dot plot and a five number summary
+
+```{r}
+gf_dotplot( ~ IQ, data = state_data)
+mean( ~ IQ, data = state_data) 
+favstats( ~ IQ, data = state_data) 
+
+```
+Based on my EDA, I learned that the statewide average IQ scores is slightly skewed left and not symmetric, ranging from 942. to 104.3. The average score is 100.344. Based on the data it seems that there is moderate to strong evidence to support the null hypothesis and to reject the alternative hypothesis. Having a large sample test is good to conduct a one simple t-test, but it is not good to have a slightly unsymmetrical distribution.
+
+**TASK 2.3--Inference and Conclusions**
+```{r}
+t.test( ~ IQ, mu = 95, alternative = "less", data = state_data) 
+
+t.test( ~ IQ, mu = 95, alternative = "two.sided", data = state_data) 
+
+```
+After performing a one-sided t-test for a single mean, I see that the standardized test statistic is $13.954$ and the p-value is 1. Thus we fail to reject the null hypothesis. There is extremely strong evidence that the average statewide IQ scores are at least 95. Further, based on the confidence interval I am 95% certain that the true statewide average IQ score is between 99.5744 and 101.1136.
+
+
+
+
+# Part 3: Two categorical variables
+
+EnoughFruit and EnoughVeg 
+
+**TASK 3.1--Introduction of the variables:**
+The variables of interest are EnoughVeg and EnoughFruit. Both are categorical variables. Under60% if less than 60% of residents eat the daily fruit or Over60% if more than 60% of residents eat the daily fruit. Under75% if less than 75% of residents eat the daily vegetables or Over75% if more than 75% of residents eat the daily vegetables. 
+
+A reasonable research question would be: Are states with more than 60% of people who eat their daily fruit more likely to have more than 75% of people eating enough vegetables? 
+The corresponding hypotheses to test would then be:
+\begin{align*}
+H_0:p_1=p_2 \\
+H_a:p_1>p_2
+\end{align*}
+
+Where $p_1$ is the proportion of states with at least 75% of people getting enough vegetables, when considering only states with at least 60% of people who eat their daily fruit, and $p_2$ is the proportion of states with at least 75% of people getting enough vegetables, when considering only states with less than 60% of people eating less than 60% of their daily fruits.
+
+**TASK 3.2--Exploratory Data Analysis**
+A good visual summary and numerical summaries would be a stacked bar chart and the difference in sample proportions.
+
+```{r}
+gf_bar( ~ EnoughFruit, fill = ~ EnoughVeg, data = state_data, position = position_dodge())
+tally( EnoughVeg ~ EnoughFruit, data = state_data)
+```
+Based on my EDA, I see that states with more daily fruit eating also appear to have more residents that eat enough veggies. Specifically, the high proportion of states that eat enough fruits with high proportion of residents that eat enough vegetables is 29/31 = 0.935.  For low proportion of states that do not eat enough fruits that proportion is 9/19 = 0.474. The difference between the sample proportions is thus 0.935 - 0.474 = 0.461.  This is most likely a large enough difference to be statistically significant in a hypothesis test.  
+
+The sample size is a bit small, however, as there are only 2 states that are high fruit and low vegetable. Ideally, we would need more observations for this test to be valid.
+
+
+**TASK 3.3--Inference and Conclusions**
+
+```{r}
+prop.test(EnoughVeg ~ EnoughFruit, alternative="greater", data = state_data) 
+prop.test(EnoughVeg ~ EnoughFruit, alternative="two.sided", data = state_data) 
+```
+The one-sided test for a difference in proportions yields a p-value of 0.0003757, indicating strong evidence against the null and in favor of the alternative. At a significance level of 0.05 we cannot reject the null hypothesis and accept the alternative hypothesis. We have enough evidence to claim that states with more than 60% of residents who eat their daily fruits are more likely to have more than 75% of people eating enough vegetables.  
+
+I am 95% certain that the difference in proportions of high vegetable eating states is between 0.1787630 and 0.7448363 when comparing Over60% fruit states to Under60% fruit states. 
+
+# Part 4: One Categorical and one quantitative variable
+
+IQ and BidenTrump
+
+**TASK 4.1--Introduction of the variables:**
+The variables of interest are quantitative IQ, which gives the average IQ score for each state, and categorical BidenTrump, which gives the winner of the 2020 election from each state. Some reasonable research questions could be "Is the statewide average scores different, when comparing states that won for trump to states that won for Biden?" if so, "How different?" The first can be answered with a hypothesis test, and the second with a confidence interval.  The hypotheses would be:
+begin{align*}
+H_0:\mu_1=\mu_2 \\
+H_a:\mu_1\ne \mu_2
+\end{align*}
+
+where $\mu_1$ and $\mu_2$ are the mean statewide IQ scores for states that Trump won and that Clinton won, respectively.
+
+**TASK 4.2--Exploratory Data Analysis**
+
+A great option is the side-by-side boxplots. It is also important to calculate the mean for both groups, and the difference in those means.
+```{r}
+gf_boxplot(IQ ~ BidenTrump, data = state_data)
+mean(IQ ~ BidenTrump, data = state_data )
+diff(mean(IQ ~ BidenTrump, data = state_data ))
+```
+Based on the difference of means from our data, states that Trump won had a slightly lower IQ compared to states that Biden won.  Both groups have distributions that seem nearly perfectly symmetrical.I doubt that we will find a statistically significant difference between the two groups, based on this EDA. Further, it appears that all conditions are met to perform a two-sample t-test: both sample distributions are 'well-behaved' and have 'large enough' sample sizes.
+
+
+
+**TASK 4.3--Inference and Conclusions**
+
+```{r}
+t.test(IQ ~ BidenTrump, alternative = "two.sided",data = state_data)
+```
+
+After performing a two-sided t test for the difference in means, I see that the standardized test statistic is 0.73813 and the p-value is 0.464. This indicates that, if there is truly no difference in IQ scores between stats that Trump won versus states Biden won,then the chance of seeing a sample difference that is relevant is .464.
+
+We cannot reject the null hypothesis. There is no evidence of a difference in statewide average IQ scores when comparing states that Trump won to states that Biden won. Correspondingly, the 95% confidence interval includes the null value of 0. I am 95% confidence that the true difference in statewide average IQ scores is between -0.979 and 2.115 when comparing states that Trump won versus states that Biden won.
+
+
+

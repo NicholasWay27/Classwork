@@ -1,0 +1,299 @@
+---
+title: "Stat 300 Homework 6"
+author: "YNicholas Way"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+  html_notebook: default
+---
+
+This homework is based on exercises from Chapters 3 and 4 in The Stat2 textbook.  You may need to read the relevant problems in the text in order to complete this assignment.  Write your answers and include your notes in this document, and submit as a pdf online in the Canvas HW Quiz.  
+
+**TASK** load all the packages that we are likely to need for this assignment:
+
+```{r, include = F}
+#rm(list = ls()) #clear the workspace
+
+library(Stat2Data)
+library(tidyverse)
+library(mosaic)
+library(ggformula)
+library(car)
+library(leaps)
+library(HH)
+library(tinytex)
+library(olsrr)
+```
+
+
+# 1. Major League baseball
+
+The **MLBStandings2016** dataset records many variables for Major League Baseball (MLB) teams from the 2016 regular season. In this exercise, you'll consider models with four variables to predict winning percentages (*WinPct*) using any of the predictors except *Wins* and *Losses* - Those would make it too easy!  Don't worry if you are unfamiliar with baseball terminology as some of the acronyms for variable names have little meaning.  Although knowledge of the context for data is often helpful for choosing good models, you should use software to build the models requested in this exercise rather than using specific baseball knowledge.
+
+**TASK 1.0** Load the dataset.
+
+```{r}
+data("MLBStandings2016")
+MLBStandings2016 <- MLBStandings2016 %>%
+  dplyr::select(-Team, -Wins, -Losses)
+```
+
+**TASK 1.1** Use forward selection until you have a four-predictor model for *WinPct*.  You may need to adjust the criteria if the procedure won't give sufficient steps initially.  Write down the predictors in this model and its R-squared value.
+
+```{r}
+none <- lm(WinPct ~ 1, data = MLBStandings2016)
+full_model <- lm(WinPct ~ ., data = MLBStandings2016)
+MSE <- (summary(full_model)$sigma)^2
+step(none, scope = list(upper = full_model), scale = MSE, direction = "forward", steps = 4)
+forward <- lm(formula = WinPct ~ ERA + Runs + Saves + WHIP, data = MLBStandings2016)
+summary(forward)
+```
+The predictor variables for this model are ERA, Runs, Saves, and WHIP. The multiple R-square is .8863 and the adjusted R is .8681.
+
+
+
+**TASK 1.2** Use backward elimination until you have a four-predictor model for *WinPct*.  You may need to adjust the criteria if the procedure stops too soon to continue eliminating predictors.  Write down the predictors in this model and its R-squared value.
+
+```{r}
+step(full_model, scale = 1, direction = "backward", steps = 13)
+```
+
+The predictors are BattingAverage, Runs, Saves, and WHIP. The multiple R-squared is .8836 and the adjusted is .865.
+
+**TASK 1.3** Use a "best subsets" procedure to determine which four predictors together would explain the most variability in *WinPct*.  Write down the predictors in this model and its R-squared value.
+
+```{r}
+all <- regsubsets(WinPct ~ ., data = MLBStandings2016)
+summary(all)$adjr2
+plot(all, scale = 'adjr2')
+```
+
+The model with the highest R squared is .91 and has predictors intercept, batting average, runs, hits, OBP, hits allowed, walks, and WHIP.
+
+**TASK 1.4** Find the value of Mallow's Cp for each of the models you produced in tasks 1.1--1.3.  Note that you may be interested in using a function to calculate Mallow's Cp.  A variety are available in different R packages, including the function ols_mallows_cp(model = mymodel, fullmodel = full_model) from the package olsrr.
+
+```{r}
+ols_mallows_cp(model = full_model, fullmodel = full_model)
+ols_mallows_cp(model = none, fullmodel = full_model)
+plot(all, scale = "Cp")
+```
+
+Backwards: 18
+Forwards: 245.5089
+Best Subset: 5.7
+
+**TASK 1.5** Assuming that the three procedures did not all give the same four-predictor model, which model would you prefer?  Explain why.
+
+None of the three models contained the same three predictor variables. I personally would use the model with the highest adjusted R^2, which takes into account the changes in y as a result of changes of x. Therefore, I would use the best subsets model.
+
+# 2. NCbirths
+
+The file **NCbirths** contains data on a sample of 1450 birth records that statistician John Holcomb selected from the North Carolina State Center for Health and Environmental Statistics.  One of the questions of interest is how the birth weights (in ounces) of the babies might be related to the mother's race.  The variable *MomRace* codes the mother's race as 'white', 'black', 'hispanic', or 'other'.  When you use R to run a regression model using *MomRace* to predict *BirthWeightOz*, R sets up indicator variables for each of these categories.
+
+**TASK 2.1** Load the dataset and fit a model that uses *MomRace* to predict *BirthWeightOz*.  Report the fitted model.
+
+```{r}
+data("NCbirths")
+lm(BirthWeightOz ~ MomRace, data = NCbirths)
+```
+
+**TASK 2.2** Explain what each of the coefficients in your fitted model tells us about race and birth weights for babies born in North Carolina.
+
+MomRacehispanic means that if the mother's race is haispanic, there baby will be 7.955 ounces heavier. MomRacewhite means that if the mother's race is white, there baby will be 7.309 ounces heavier. MomRaceother means that if the mother's race is different from white or hispanic, there baby will be 6.583 ounces heavier.
+
+**TASK 2.3**  Produce the model summary for the model you fit in task 2.1.  
+
+```{r}
+BirthModel <- lm(BirthWeightOz ~ MomRace, data = NCbirths)
+summary(BirthModel)
+```
+
+Assuming that the conditions for a regression model hold in this situation, interpret each of the following parts of this output, being sure that your answers refer to the context of this problem
+
+**TASK 2.3.1**  The individual t-tests for the coefficients of the indicator variables.
+
+MomRacehispanic: 3.766
+MomRacewhite: 5.147
+MomRaceother: 1.926
+
+**TASK 2.3.2** The value of R-squared.
+
+Multiple R squared: .01938
+Adjusted R squared: .01735
+
+**TASK 2.3.3** The overall F-test in the ANOVA table.
+
+```{r}
+anova(BirthModel)
+```
+
+The f value is 9.5282
+
+# 3. Surgical Unit Case Study
+
+Research Questions: 
+
+  1.	Is the prognostic index alone useful for predicting survival time? 
+  2.	Is the prognostic index useful after accounting for other potentially related predictors?
+  3. Which factors impact survival time after a liver operation, and how?
+
+Variables available:
+
+ - BloodClottingScore: A measure of how well a person's blood clots
+ - PrognosticIndex: A measure of how well a person is expected to do
+ - EnzymeTest: enzyme function test score
+ - LiverTest: liver function test score
+ - Age: age, in years
+ - Sex: male/female
+ - AlcoholUse: none/moderate/heavy
+ 
+Response:
+  - SurvivalTime
+
+**TASK 3.0**
+The code below will help you to read in the data, and create a dataset that includes only the quantitative variables.
+
+```{r}
+# read in the data from the downloaded file
+surgery_data <- read.csv("C:/Users/nicho/OneDrive/Documents/Stat 300/Homeworks/HW 6 Stat 300/SurgicalUnit300.csv", header=T)
+head(surgery_data)
+names(surgery_data)[1] <- "SurvivalTime" #get rid of the i.. as RStudio labels the first column incorrectly
+head(surgery_data)
+
+## Data processing to observe *only* quantitative variables 
+#  you can use this code *or not*, as you desire.
+surgery_quantonly <- surgery_data %>%
+  dplyr::select(-Sex, -Alcohol)
+
+```
+**TASK 3.1.1** Perform meaningful EDA for relating the quantitative predictors to the response, and comment on what you observe.
+```{r}
+pairs(surgery_quantonly)
+cor.test(SurvivalTime ~ BloodClottingScore, data = surgery_quantonly)
+cor.test(SurvivalTime ~ PrognosticIndex, data = surgery_quantonly)
+cor.test(SurvivalTime ~ EnzymeTest, data = surgery_quantonly)
+cor.test(SurvivalTime ~ LiverTest, data = surgery_quantonly)
+cor.test(SurvivalTime ~ Age, data = surgery_quantonly)
+```
+
+**TASK 3.1.2** Perform meaningful EDA for relating the categorical predictors to the response, and comment on what you observe.
+```{r}
+gf_boxplot(SurvivalTime ~ Sex, data = surgery_data)
+gf_boxplot(SurvivalTime ~ Alcohol, data = surgery_data)
+```
+### 3.2 - research question 1:
+Is the prognostic index alone useful for predicting survival time?
+
+Yes the p value is below .05
+
+```{r}
+progmodel <- lm(SurvivalTime ~ PrognosticIndex, data = surgery_data)
+summary(progmodel)
+```
+
+
+**TASK 3.2.1** Perform meaningful EDA specifically in the context of this first research question, and comment on what you observe.
+```{r}
+ggplot(data = surgery_data,
+       mapping = aes(x = PrognosticIndex,
+                     y = SurvivalTime)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+
+```
+**TASK 3.2.2** What test/model do you choose to answer the research question?  Do you have any reasons to worry about whether this test/model is valid?  (you should assess the conditions)
+
+The t test gave a t value of 3.342 and a p value of less than .05. The outlier condition is and issue because of two obvious outliers in the model, 5 and 28.
+
+```{r}
+summary(progmodel)
+plot(progmodel)
+```
+**TASK 3.2.3** Decide whether you need to perform a transformation and explain your choice.  If you choose to do so, then re-fit the model and re-assess the conditions.
+
+```{r}
+gf_boxplot(log(SurvivalTime) ~ PrognosticIndex, data = surgery_data)
+gf_boxplot(SurvivalTime ~ PrognosticIndex, data = surgery_data)
+logprogmodel <- lm(log(SurvivalTime) ~ PrognosticIndex, data = surgery_data)
+summary(logprogmodel)
+plot(logprogmodel)
+```
+
+I would personally use the log transformed model because the outliers become less impactful. All the conditions are met and have an overall better fit with the transformed model.
+
+**TASK 3.2.4** Use your model to answer the research question in context.
+
+In my opinion, prognostic index alone, can accurately predict survival time.
+
+### 3.3 - Research questions 2 and 3:
+
+2. Is the prognostic index useful after accounting for other potentially related predictors?
+
+```{r}
+progall <- regsubsets(SurvivalTime ~ ., data = surgery_data)
+plot(progall, scale = "adjr2")
+```
+
+According to the method of using best subsets, prognostic index can be a valuable predictor for survival time.
+
+3.	Which factors impact survival time after a liver operation, and how?
+These two research questions are linked, in that both of them require you to choose a multiple regression model and then use it.
+
+**TASK 3.3.1** Fit a full first-order model with all variables (including both Sex and Alcohol).
+
+```{r}
+surgmodel <- lm(SurvivalTime ~ ., data = surgery_data)
+summary(surgmodel)
+```
+
+**TASK 3.3.2**  Do you have any concerns about multicollinearity? Justify your answer.
+
+```{r}
+vif(surgmodel)
+```
+
+I do not have any concerns regarding multicollinearity, because none of the vif values are above 5.
+
+**TASK 3.3.3** Assess the conditions for your model.  If you have any concerns that would be solved by a transformation, perform the transformation and re-fit the model.
+
+The log transformation improved the model overall. The outliers became less extreme and the conditions are improved.
+
+```{r}
+logsurgmodel <- lm(log(SurvivalTime) ~ ., data = surgery_data)
+summary(logsurgmodel)
+plot(logsurgmodel)
+```
+
+
+**TASK 3.3.4** How many of the terms in your model are significant?
+
+```{r}
+summary(logsurgmodel)
+```
+
+There are 5 significant terms in the model.
+
+**TASK 3.3.5** Use a variable selection method (best subsets, forward selection, backwards elimination, or stepwise regression) to choose a model and report which variables are included. 
+
+```{r}
+step(logsurgmodel, scale = 1, direction = "backward", steps = 13)
+```
+
+The variables intercept, PrognosticIndex, and EnzymeTest are uncluded as significant when using backward elimination
+
+**TASK 3.3.6** Assess the conditions for the model you chose in part 3.3.5 and comment.
+
+```{r}
+plot(logsurgmodel)
+```
+
+After transforming, there is still one minor outlier, but still decreased the overall outliers and improved all of the conditions in total.
+
+**TASK 3.3.7** Answer the second research question in context using what you learned from the model fitting above.  
+
+The prognostic index is useful and reliable after accounting for other predictors. When using backward elimination and best subsets, the p value remained under .05.
+
+**TASK 3.3.8** Answer the third research question, in context.
+
+After a liver operation, prognostic index and enzyme test impact survival time, which was determined by using backward elimination. When other variables are constant, for every time PrognosticIndex increases by 1, survival time increases by .01413 seconds. When other variables are constant, for every time EnzymeTest increases by 1, survival time increases by .01538 seconds. 

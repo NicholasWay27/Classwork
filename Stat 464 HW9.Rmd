@@ -1,0 +1,190 @@
+---
+title: "Stat 464 HW 9"
+author: "Nicholas Way"
+date: "2024-04-01"
+output: html_document
+---
+I used ChatGPT to help me write some of the code
+
+### Front Matter
+```{r}
+rm(list = ls())
+library(ggplot2)
+library(tidyverse)
+library(BSDA)
+library(haven)
+library(lmPerm)
+library(stats)
+library(combinat)
+library(gtools)
+library(permute)
+
+set.seed(123)
+```
+
+# Question 1
+## part a
+### Statistics
+
+```{r}
+# Define the data
+ages <- c(8, 80, 180, 370)
+strengths <- c(3200, 5900, 6700, 7100)
+
+# Compute Pearson's correlation
+pearson_corr <- cor(ages, strengths, method = "pearson")
+cat("Pearson's correlation:", pearson_corr, "\n")
+
+# Compute Spearman's correlation
+spearman_corr <- cor(ages, strengths, method = "spearman")
+cat("Spearman's correlation:", spearman_corr, "\n")
+
+# Compute Kendall's tau
+kendall_tau <- cor(ages, strengths, method = "kendall")
+cat("Kendall's tau:", kendall_tau, "\n")
+
+```
+
+## part b
+### Permutations 
+#### i & ii
+
+Null Hypothesis: There is no relationship between the ages and the strengths of the concrete cylinders
+
+Alternative Hypothesis: There is a relationship between the ages and the strengths of the concrete cylinders
+
+Statistics: Peasron & Spearman
+
+
+```{r}
+# Function to perform permutation test with all possible permutations
+perform_all_permutation_test <- function(x, y) {
+  # Calculate observed statistics
+  observed_stat_pearson <- cor(x, y)
+  observed_stat_spearman <- cor(x, y, method = "spearman")
+  
+  # Generate all possible permutations of y
+  all_permutations <- permutations(n = length(y), r = length(y), v = y)
+  
+  # Calculate the test statistics for all permutations
+  permutation_stats_pearson <- apply(all_permutations, 1, function(y_perm) cor(x, y_perm))
+  permutation_stats_spearman <- apply(all_permutations, 1, function(y_perm) cor(x, y_perm, method = "spearman"))
+  
+  # P-values
+  p_value_pearson <- sum(abs(permutation_stats_pearson) >= abs(observed_stat_pearson)) / length(permutation_stats_pearson)
+  p_value_spearman <- sum(abs(permutation_stats_spearman) >= abs(observed_stat_spearman)) / length(permutation_stats_spearman)
+  
+  # Plotting for Pearson
+  pearson_plot <- ggplot() +
+    geom_histogram(aes(x = permutation_stats_pearson), binwidth = 0.1, fill = "blue", color = "black") +
+    geom_vline(xintercept = observed_stat_pearson, color = "red", linetype = "dashed", size = 1.5) +
+    labs(title = "Permutation Distribution with Observed Pearson Correlation",
+         x = "Pearson Correlation Coefficient",
+         y = "Frequency") +
+    theme_minimal()
+  
+  print(pearson_plot) # Explicitly print the Pearson plot
+  cat("P-value for Pearson correlation:", p_value_pearson, "\n")
+  
+  # Plotting for Spearman
+  spearman_plot <- ggplot() +
+    geom_histogram(aes(x = permutation_stats_spearman), binwidth = 0.1, fill = "green", color = "black") +
+    geom_vline(xintercept = observed_stat_spearman, color = "red", linetype = "dashed", size = 1.5) +
+    labs(title = "Permutation Distribution with Observed Spearman Correlation",
+         x = "Spearman Correlation Coefficient",
+         y = "Frequency") +
+    theme_minimal()
+  
+  print(spearman_plot) # Explicitly print the Spearman plot
+  cat("P-value for Spearman correlation:", p_value_spearman, "\n")
+}
+
+# Execute the function
+perform_all_permutation_test(ages, strengths)
+```
+
+
+Using the set seed of (123)
+
+The p value when calculating the Pearson's statistic is .1666, which is greater than .05, so we fail to reject the null hypothesis. This suggests that there is not a relationship between the ages and the strengths of the concrete cylinders.
+
+The p value when calculating the Pearson's statistic is .0833, which is greater than .05, so we fail to reject the null hypothesis. This suggests that there is not a relationship between the ages and the strengths of the concrete cylinders.
+
+Even though both statistics have a statistic of 1, as shown in the red line, the p values suggest there is no relationship between age and strength, this may be due to the small dataset and the limited number of permutations (24).
+
+# Question 2
+## part a
+### Slope
+
+```{r}
+# Data
+height <- c(70, 74, 67)
+weight <- c(145, 158, 140)
+
+# Function to calculate slope of the least squares line
+calc_slope <- function(x, y) {
+  lm_model <- lm(y ~ x)
+  return(coef(lm_model)[2])
+}
+
+# Permutations
+perms <- permn(height)
+
+# Calculate statistics for each permutation
+slopes <- sapply(perms, function(p) calc_slope(p, weight))
+spearman_rs <- sapply(perms, function(p) cor(p, weight, method = "spearman"))
+kendall_rt <- sapply(perms, function(p) cor(p, weight, method = "kendall"))
+
+# Output results
+print(slopes)
+
+print(spearman_rs)
+
+print(kendall_rt)
+```
+
+## part b
+### Permutation
+
+```{r}
+# Calculate observed Spearman's rs
+obs_rs <- cor(height, weight, method = "spearman")
+
+# Generate all permutations of weight
+weight_perms <- permn(weight)
+
+# Calculate Spearman's rs for each permutation
+perm_rs <- sapply(weight_perms, function(w_perm) cor(height, w_perm, method = "spearman"))
+
+# Calculate p-value for positive association
+p_value <- sum(perm_rs >= obs_rs) / length(perm_rs)
+
+# Output p-value and conclusion
+cat("P-value using Spearman's rs:", p_value, "\n")
+if (p_value < 0.10) {
+  cat("Reject H0: Evidence of positive association.\n")
+} else {
+  cat("Fail to reject H0: No evidence of positive association.\n")
+}
+
+```
+
+## part c
+### Hypothesis
+
+
+```{r}
+# Pearson's correlation test
+cor_test <- cor.test(height, weight, method = "pearson", alternative = "two.sided")
+
+# Output p-value and conclusion
+cat("P-value:", cor_test$p.value, "\n")
+if (cor_test$p.value < 0.10) {
+  cat("Reject H0, evidence of association.\n")
+} else {
+  cat("Fail to reject H0, no evidence of association.\n")
+}
+```
+
+Using this test in part c, we fail to reject the null hypothesis. This gives us the same result as we had in part b using Spearman's
+

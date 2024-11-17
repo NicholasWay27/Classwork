@@ -1,0 +1,383 @@
+---
+title: "Stat 464 HW3"
+author: "Nicholas Way"
+date: "2024-01-28"
+output: html_document
+---
+
+### Front Matter
+```{r}
+rm(list = ls())
+library(ggplot2)
+library(tidyverse)
+library(BSDA)
+```
+
+# Question 1
+## Part a
+### Find the permutation distribution for these samples. For each possibility, compute the difference in sample means and the difference in medians.
+
+Mean A = (5 + 6 + 1)/3 = 4         Mean B = (2 + 9)/2 = 5.5    Difference in mean = -1.5
+
+Median A = 5        Mean B = 5.5       Difference in median = -.5
+
+(562, 19) Dmean = -.66  Dmed = 0
+(569, 12) Dmean = 5.16  Dmed = 4.5
+(512, 69) Dmean = -4.83 Dmed = -5.5
+(519, 26) Dmean = 1     Dmed = 1
+(612, 59) Dmean = -4    Dmed = -5
+(619, 52) Dmean = 1.83  Dmed = 2.5
+(629, 51) Dmean = 2.66  Dmed = 3
+(529, 61) Dmean = 1.83  Dmed = 1.5
+(129, 65) Dmean = -1.5  Dmed = -3.5
+
+## Part b
+### Hypothesis
+
+Ho: μ1 = μ2   Ha: μ1 <  μ2  Difference in observations = 1
+
+## Part c
+### p value with means
+
+P value = #{D <= Dobs}/ (m+n choose m)
+(m+n choose m) = 10
+ #{D <= Dobs} = 5
+P value = 5/10 = 1/2 = .5 > .05 therefore we fail to reject the null hypothesis
+
+## Part d
+### repeat c but wiht medians
+
+P value = #{D <= Dobs}/ (m+n choose m)
+(m+n choose m) = 10
+ #{D <= Dobs} = 5
+P value = 5/10 = 1/2 = .5 > .05 therefore we fail to reject the null hypothesis
+
+## Part e
+### do the conclusions agree
+
+In this case, both the difference in means and difference in medians tests have the same conclusions where we fail to reject the null hypothesis
+
+## Part f
+### what are advantages of median vs mean
+
+The means are often easier to calculate and think about than medians are, however, means are more susceptible to the influence of outliers and skewed data, where as the medians are more resistant.
+
+# Question 2
+## Part a
+### Find the permutation distribution for these samples
+
+```{r}
+new = c(11,36,25,48, 51)   # Data for the 'new' group.
+m = length(new)        # Number of observations in the 'new' group.
+trad = c(56,64,70,18,90)     # Data for the 'traditional' group.
+n = length(trad)       # Number of observations in the 'traditional' group.
+```
+
+```{r}
+D.obs = mean(new) - mean(trad)
+
+# Calculate the total number of possible permutations.
+total = choose(m+n,m)
+# Combine the two datasets into one.
+scores = c(new,trad)
+
+# Generate all possible combinations of selecting 'm' items from 'm+n' items.
+perm = t(Combinations(m+n,m))
+
+# Initialize the computation of the difference in means for the first permutation.
+group = c(scores[perm[1,]], setdiff(scores,scores[perm[1,]]))  # Create a permuted group.
+diff = mean(group[1:m]) - mean(group[(m+1):(m+n)])  # Calculate difference in means for this permutation.
+```
+
+```{r}
+# Loop through all the remaining permutations and calculate the difference in means for each.
+for(i in 2:total){
+  # Create a permuted group for the i-th permutation.
+  temp = c(scores[perm[i,]], setdiff(scores,scores[perm[i,]]))
+  # Append the calculated difference in means to the 'diff' vector.
+  diff = rbind(diff, mean(temp[1:m]) - mean(temp[(m+1):(m+n)]))
+  # Append the current permuted group to the 'group' matrix.
+  group = rbind(group, temp)
+}
+```
+
+```{r}
+# Combine the permuted groups and their corresponding differences in means.
+results = cbind(group, round(diff,2))
+
+# Sort the results based on the difference in means.
+results[order(diff),]
+
+# Calculate the p-value for the permutation test.
+p.val = sum(results[,m+n+1]>=D.obs) / total
+p.val
+```
+
+Column 11 represents the difference in means. I will compute the difference in medians in part d.
+
+## Part b
+### Hypothesis
+
+Ho: μ1 = μ2   Ha: μ1 <  μ2
+
+## Part c
+### p value and conclusion
+
+The p value is .95 which is greater than .05, so we fail to reject the null hypothesis
+
+## Part d
+### p value and conclusion
+
+```{r}
+D.obs = median(new) - median(trad)
+
+# Calculate the total number of possible permutations.
+total = choose(m+n,m)
+# Combine the two datasets into one.
+scores = c(new,trad)
+
+# Generate all possible combinations of selecting 'm' items from 'm+n' items.
+perm = t(Combinations(m+n,m))
+
+# Initialize the computation of the difference in means for the first permutation.
+group = c(scores[perm[1,]], setdiff(scores,scores[perm[1,]]))  # Create a permuted group.
+diff = median(group[1:m]) - median(group[(m+1):(m+n)])  # Calculate difference in medians for this permutation.
+```
+
+```{r}
+# Loop through all the remaining permutations and calculate the difference in medians for each.
+for(i in 2:total){
+  # Create a permuted group for the i-th permutation.
+  temp = c(scores[perm[i,]], setdiff(scores,scores[perm[i,]]))
+  # Append the calculated difference in medians to the 'diff' vector.
+  diff = rbind(diff, median(temp[1:m]) - median(temp[(m+1):(m+n)]))
+  # Append the current permuted group to the 'group' matrix.
+  group = rbind(group, temp)
+}
+```
+
+```{r}
+# Combine the permuted groups and their corresponding differences in medians
+results = cbind(group, round(diff,2))
+
+# Sort the results based on the difference in medians
+results[order(diff),]
+
+# Calculate the p-value for the permutation test.
+p.val = sum(results[,m+n+1]>=D.obs) / total
+p.val
+```
+
+The p value is .94, which is greater than .05, so we fail to reject the null hypothesis.
+
+## Part e
+### 2 sample t test
+
+```{r}
+# Compute t-test
+res <- t.test(new, trad)
+res
+```
+
+The 2 sample t test gave us a p value of 0.1133 which is greater than .05, so we fail ro reject the null hypothesis.
+
+## Part f
+### Is a t test appropriate?
+
+The main two assumptions that need to be met in order for a t test to be appropriate are that the data in each group are independently and identically distributed, and that the data in each group are normally distributed. Since the directions are not clear on whether or not these assumptions are met, I would assume that the permutation tests are more appropriate. A t test is not appropriate.
+
+# Question 3
+## Part a
+### Permutation tests
+
+```{r}
+x = read.table("C:/Users/nicho/OneDrive - The Pennsylvania State University/Stat 464/Homework/carapace.dat", header=T)
+```
+
+```{r}
+new = c(5,8,11,12,16)   # Data for the 'new' group.
+m = length(new)        # Number of observations in the 'new' group.
+trad = c(13,14,15,17,19,21)     # Data for the 'traditional' group.
+n = length(trad)       # Number of observations in the 'traditional' group.
+```
+
+```{r}
+D.obs = mean(new) - mean(trad)
+
+# Calculate the total number of possible permutations.
+total = choose(m+n,m)
+# Combine the two datasets into one.
+scores = c(new,trad)
+
+# Generate all possible combinations of selecting 'm' items from 'm+n' items.
+perm = t(Combinations(m+n,m))
+
+# Initialize the computation of the difference in means for the first permutation.
+group = c(scores[perm[1,]], setdiff(scores,scores[perm[1,]]))  # Create a permuted group.
+diff = mean(group[1:m]) - mean(group[(m+1):(m+n)])  # Calculate difference in means for this permutation.
+```
+
+```{r}
+# Loop through all the remaining permutations and calculate the difference in means for each.
+for(i in 2:total){
+  # Create a permuted group for the i-th permutation.
+  temp = c(scores[perm[i,]], setdiff(scores,scores[perm[i,]]))
+  # Append the calculated difference in means to the 'diff' vector.
+  diff = rbind(diff, mean(temp[1:m]) - mean(temp[(m+1):(m+n)]))
+  # Append the current permuted group to the 'group' matrix.
+  group = rbind(group, temp)
+}
+```
+
+```{r}
+# Combine the permuted groups and their corresponding differences in means.
+results = cbind(group, round(diff,2))
+
+# Sort the results based on the difference in means.
+results[order(diff),]
+
+# Calculate the p-value for the permutation test.
+p.val = sum(results[,m+n+1]>=D.obs) / total
+p.val
+```
+
+The p value = .9913, which is greater than .05, therefore we fail to reject the null hypothesis
+
+## Part b
+### Permutation tests
+
+```{r}
+# Set seed for reproducibility
+set.seed(12345)
+
+new = c(5,8,11,12,16)   # Data for the 'new' group.
+m = length(new)        # Number of observations in the 'new' group.
+trad = c(13,14,15,17,19,21)     # Data for the 'traditional' group.
+n = length(trad)       # Number of observations in the 'traditional' group.
+D.obs = mean(new) - mean(trad)
+
+# Calculate the total number of possible permutations.
+total = 100
+# Combine the two datasets into one.
+scores = c(new,trad)
+
+# Generate all possible combinations of selecting 'm' items from 'm+n' items.
+perm = t(Combinations(m+n,m))
+
+# Initialize the computation of the difference in means for the first permutation.
+group = c(scores[perm[1,]], setdiff(scores,scores[perm[1,]]))  # Create a permuted group.
+diff = mean(group[1:m]) - mean(group[(m+1):(m+n)])  # Calculate difference in means for this permutation.
+
+# Loop through all the remaining permutations and calculate the difference in means for each.
+for(i in 1:total){
+  # Create a permuted group for the i-th permutation.
+  temp = c(scores[perm[i,]], setdiff(scores,scores[perm[i,]]))
+  # Append the calculated difference in means to the 'diff' vector.
+  diff = rbind(diff, mean(temp[1:m]) - mean(temp[(m+1):(m+n)]))
+  # Append the current permuted group to the 'group' matrix.
+  group = rbind(group, temp)
+}
+
+# Combine the permuted groups and their corresponding differences in means.
+results = cbind(group, round(diff,2))
+
+# Sort the results based on the difference in means.
+results[order(diff),]
+
+# Calculate the p-value for the permutation test.
+p.val = sum(abs(results[,m+n+1])>=abs(D.obs)) / total
+p.val
+```
+
+The p value = .08, which is less than .05, therefore we reject the null hypothesis.
+
+## Part c
+### Is using mean appropriate?
+
+I would say that since our data most likely follows a normal distribution, and the fact that our data does not have any outliers or extreme values, it is appropiate to use the mean in our permutation tests. It is equally appropiate to use the medians as well.
+
+# Question 4
+## Part a
+### Test
+
+Ho: μ1 = μ2   Ha: μ1 <  μ2  Difference in observations = 0 
+
+11 = 1             W1 = 19 W2 = 36    P value = #{W <= W1}/ (m+n choose m)
+18 = 2                                        = #{W <= 19}/ (10 choose 5)
+25 = 3                                        = 11/252
+36 = 4                                        = .0436 < .05
+48 = 5
+51 = 6
+56 = 7    since P value is below significance level of .05, we reject the null hypothesis
+64 = 8
+70 = 9
+90 = 10
+
+12345
+12346
+12347
+12348
+12349
+12356
+12357
+12358
+12456
+12457
+13456
+
+## Part b
+### Large sample approximation
+
+E = ((N+1)m)/2            Var = (mn(N+1))/W1
+E = ((10+1)5)/2           Var = (25(10+1))/19
+E = 55/2                  Var = 275/12
+
+P value = (W1-E)/sqrt(Var)
+P value = (19-(55/2))/sqrt(275/19)
+P value = -8.5/4.787
+P value = 1 - I(-1.776) = 1-.9625 = .0375
+
+The p value is .0375, which is less than .05, therefore we reject the null hypothesis.
+
+# Question 5
+
+```{r}
+sampleA=c(11,36,25,48,51)
+sampleB=c(56,64,70,18,90)
+```
+
+```{r}
+wilcox.test(sampleA, sampleB, alternative = "less")
+```
+
+The p value is .0476, which means that we reject the null hypothesis that the two μ of the treatments are equal.
+
+
+# Question 6
+## part a
+
+W = Σi Ri
+E(Ri) = (N+1)/2
+E(W) = E(Σi Ri) = Σ(N+1)/2 = (m(N+1))/2
+
+## part b
+
+Var(W) = E(W^2) - [E(W)]^2
+E(W) = (m(N+1))/2
+
+W^2 = (Σi Ri)^2 = Σi (Ri^2) + 2Σij(Ri * Rj)
+
+E(Ri^2) = Σi [(N^2-1)/12]
+
+When i /= j, E(RiRj) = (N^2-1)/12
+
+E(W^2) = Σi [(N^2-1)/12] + 2Σij (N^2-1)/12
+E(W^2) = (m(N^2 - 1)/12) + 2[(m(m - 1)/2) * (N^2-1)/12]
+
+Var(W) = mn(N + 1)/12
+
+
+
+
+
+

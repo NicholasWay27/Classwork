@@ -1,0 +1,192 @@
+---
+title: "Stat 464 HW 4"
+author: "Nicholas Way"
+date: "2024-02-10"
+output: html_document
+---
+
+### Front Matter
+```{r}
+rm(list = ls())
+library(ggplot2)
+library(tidyverse)
+library(BSDA)
+```
+
+# Question 1
+## Part a
+### Compare tests
+
+The Wilcoxon rank-sum test and the permutation test are both non-parametric statistical tests used to compare two independent samples. One advantage of the Wilcoxon rank-sum test is that it's especially useful for skewed distributions or when the mean is not a good measure of central tendency due to outliers. One disadvantage of the Wilcoxon rank-sum test is that the test assumes that the distributions of the two groups are similar in shape, though they may differ in median. This assumption can be a limiting factor when comparing groups with distributions that are fundamentally different in shape.
+
+## Part b
+### Why can we have a statistical table for critical values of Wilcoxon rank-sumstatistic, but not for general permutation test?
+
+We can have statistical tables for critical values of the Wilcoxon rank-sum statistic due to its distribution under the null hypothesis being only dependent on the sample sizes of the two groups. For any given pair of sample sizes, the possible ranks and their sums are fixed, allowing for the calculation of the distribution of the rank-sum statistic under the null hypothesis. This makes it possible to tabulate critical values for different sample sizes and significance levels.
+
+We can not have statistical tables for a general permutation test because the distribution of the test statistic under the null hypothesis can vary widely. Since the permutation test involves calculating the test statistic for all possible rearrangements of the data, the distribution of this statistic under the null hypothesis is not fixed and can change. This variability makes it impractical to tabulate critical values that would be applicable across different datasets and test statistics.
+
+# Question 2
+### Can you find the critical value for your test based on what you have?
+
+You can find the critical value for the Wilcoxon rank-sum test using the table of lower and upper critical values for the Mann-Whitney statistic, these two tests are essentially equivalent but use different statistics to reach the same conclusion about the data.
+
+W = (n(n+1)/2) + U
+U = W - (n(n+1)/2)
+
+Using these relationship equations, we can convert the W into U. After we find our U value, we can use the table to find the critical values for the test. After finding the critical value for the 
+U statistic from the table, you can compare your calculated U value to determine whether to reject the null hypothesis. This method works because the Wilcoxon rank-sum test and the Mann-Whitney test are mathematically equivalent. They are just different ways of looking at the same test.
+
+# Question 3
+## a
+### 95% CI
+
+A-B
+
+11-56= -45
+11-64= -53
+11-70= -59
+11-18= -7
+11-90= -79
+36-56= -20
+36-64= -28
+36-70= -34
+36-18= 18
+36-90= -54
+25-56= -31
+25-64= -39
+25-70= -45
+25-18= 7
+25-90= -65
+48-56= -8
+48-64= -16
+48-70= -22
+48-18= 30
+48-90= -42
+51-56= -5
+51-64= -13
+51-70= -19
+51-18= 33
+51-90= -39
+
+28 = median for B = A(x-delta)
+
+-33, -30, -18, -7, 5, 7, 8, 13, 16, 19, 20, 22, 28, 31, 34, 39, 39, 42, 45, 45, 53, 54, 59, 65, 79
+
+95% CI = [-33, 79]
+
+## b
+### Kolmogorov
+
+F1^X at 51 is 4/5
+F2^X at 18 is 0/5
+
+abs( F1^X - F2^X) = abs(4/5 - 0) = 4/5 = .8 = KS
+
+1.36sqrt(1/5 +1/5) = 0.3847
+
+KS = .8 > .3847, therefore reject null hypothesis that F1X = F2X
+
+# Question 4
+## a
+### Siegel Tukey
+
+H0: sigma1 = sigma2        Ha: sigma1 > sigma2
+
+Z = 13.8, 17, 17.6, 18.4, 18.9, 19.2, 19.4, 19.5, 19.6, 19.6, 
+    20.1, 20.2, 20.2, 20.3, 20.4, 21.8, 21.9, 22, 22.2, 25.5
+
+Z1....Z20
+
+1,4,5,8,9,12,13,16,17,20,
+19,18,15,14,11,10,7,6,3,2
+
+R=3
+
+Wobs1 = 7 + 16.5 + 13 + 14 + 18.5 + 11 + 8 + 19 + 6 + 9 = 122
+
+R11 = 21.9 20.2 19.4 20.3 19.6 20.4 18.4 20.1 22.0 22.2, W = 116
+R21 = 21.9 20.2 19.4 20.3 19.6 20.4 18.4 20.1 22.0 19.5, W = 129
+R31 = 21.9 20.2 19.4 20.3 19.6 20.4 18.4 20.1 22.0 17.6, W = 118
+
+Number of  W > Wobs/R = 1/3 = .33, therefore we fail to reject the null hypothesis that sigma1 = sigma2
+
+## b
+### Ansari Bradley
+
+Z = 13.8, 17, 17.6, 18.4, 18.9, 19.2, 19.4, 19.5, 19.6, 19.6, 
+    20.1, 20.2, 20.2, 20.3, 20.4, 21.8, 21.9, 22, 22.2, 25.5
+
+Z1....Z20
+
+2,3,6,7,10,11,14,15,18,19,
+20,17,16,13,12,9,8,5,4,1
+
+R=3
+
+Wobs2 = 8 + 16.5 + 14 + 13 + 18.5 + 12 + 7 + 20 + 5 + 10 = 124
+
+R12 = 21.9 20.2 19.4 20.3 19.6 20.4 18.4 20.1 22.0 22.2, W = 118
+R22 = 21.9 20.2 19.4 20.3 19.6 20.4 18.4 20.1 22.0 19.5, W = 129
+R32 = 21.9 20.2 19.4 20.3 19.6 20.4 18.4 20.1 22.0 17.6, W = 120
+
+Wobs1 + Wobs2 /2 = 123
+
+R11 + R12 / 2 = 117
+R21 + R22 / 2 = 129
+R31 + R32 / 2 = 119
+
+Number of  W > Wobs/R = 1/3 = .33, therefore we fail to reject the null hypothesis that sigma1 = sigma2
+
+## c
+### RMD
+
+H0: sigma1 = sigma2    Ha: sigma1 > sigma2
+H0: distribution of deviances are eqaul       Ha: deviance of x1 > deviance y1
+
+Need to find the means for A and B
+
+Mean A = 20.12 
+Mean B = 19.64
+
+Deviance = xi - mean
+
+DevA = 1.78, .08, -.72, .18, -.52, .28, -1.72, -.02, 1.88, -1.22... Sum = .02
+DevB = .56, −5.84, 2.16, −0.44, −0.04, 5.86, −2.64, −2.04, −0.14, 2.56... Sum = .44
+
+RMD = (Sum(Devxi...xm)/10)/(Sum(Devyj...yn)/10)
+
+RMD = (.02/10)/(.44/10) = 1/22 = 0.04545 < .05, so therefore we reject the null hypothesis that sigma1 = sigma2
+
+# Question 5
+## a
+### CI
+
+The significance level (α) of a test is the probability of rejecting the null hypothesis when it is true (Type I error). A 5% significance level means that there is a 5% chance of concluding that there is a difference between the populations when there is none. Conversely, there is a 95% chance (1 - α) of not making this error, which corresponds to the confidence level of the interval. By testing various values of delta and including those values in the confidence interval for which the null hypothesis is not rejected, we are essentially saying that these values are plausible given the observed data at the 95% confidence level. If the test for a particular delta does not reject the null hypothesis, it implies that the observed data is plausible under the assumption that the true shift between the populations is delta.
+
+## b
+### Mann Whitney
+
+To apply this procedure with the Mann-Whitney statistic, we adjust one sample by subtracting a delta from each observation. We then apply the Mann-Whitney test to compare the adjusted sample (Yi−Δ) with the other sample (X). For each delta the Mann-Whitney test evaluates whether the distributions of the adjusted and unadjusted samples are statistically indistinguishable. If the test fails to reject H0, the delta is considered plausible and included within the confidence interval. By systematically varying delta and applying the Mann-Whitney test, we identify all values of delta for which the null hypothesis cannot be rejected at the chosen significance level. The collection of these delta values forms a confidence interval for the shift parameter.
+
+# Question 6
+### Kolmogorov Smirnov
+
+```{r}
+sample=c(-1.0433,1.1877,0.7338,0.4837,0.0119,0.3780,-0.2657,-0.0633,
+-0.7087,-0.1160,-0.1024,-2.0112,-0.6994,-0.3699,1.0159,-0.5617,
+-0.9037,-0.9764,-1.1476,-0.0509,0.8930,0.0746,-0.9831,0.8845,
+-0.7889,0.3187,-3.4665,-0.8566,-0.0611,-0.6160,-1.1416,-0.5748,
+0.9262,1.4424,-0.9191,-1.2746,1.2688,-0.8550,0.4514,-2.3538,
+-1.1743,1.1541,-1.3541,1.1381,0.1693,0.1563,-0.4186,-1.1521,
+1.3765,1.0412)
+
+ks.test(sample, "pnorm", mean = 0, sd = 1)
+```
+
+Given that the p-value (0.1742) is greater than the significance level(.05), we do not reject the null hypothesis. This means there is not enough statistical evidence to conclude that the sample does not come from a standard normal distribution N(0,1). 
+
+
+
+
+

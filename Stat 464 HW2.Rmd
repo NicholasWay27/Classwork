@@ -1,0 +1,154 @@
+---
+title: "Stat 464 HW2"
+author: "Nicholas Way"
+date: "2024-01-19"
+output: html_document
+---
+
+### Front Matter
+```{r}
+rm(list = ls())
+library(ggplot2)
+library(tidyverse)
+```
+
+# Question 1
+## Part a
+### Show that the equation is correct
+
+The median θ is such that a observations fall less than or equal to θ and at most 
+b−1 observations fall greater than or equal to θ. We define pk as the probability that exactly k observations are below the median. The probability that at least a observations are below or equal to the median is the sum of pk for k ranging from a to n. Similarly, the probability that at most b−1 observations are above or equal to the median is the sum of pk for k ranging from 0 to b−1. The sum of the probability of exactly a observations being less than or equal to θ and the probability of exactly b-1 observations greater than or equal to θ is equal to 1. By rearranging and simplifying the equations, we arrive at ((b-1)/n) - (a/n) as the probability of the median falling between the a-th and b-1th observations, which is what the equation shows in the problem.
+
+## Part b
+### Generalize CI, derive probability and critical values.
+
+You can generalize the CI by P( Xa <= θp <= Xb) = 1 - α
+
+((b-1)/n) - (a/n) = 1 - α
+
+In large-sample cases, the distribution of θp can be approximated by a normal distribution. The critical values for a two-tailed test can be found using the standard normal distribution. The z-scores corresponding to the upper and lower tails determine the critical values. You find the z scores using [X - Zα/2(s/n^.5), X + Zα/2(s/n^.5)] = [Xa, Xb]. Where X is the mean, Z is the critical value, s is the sampled standard deviation, and n is the sample size.
+
+# Question 2
+### Was the previous median score fo 75.5 increased?
+
+```{r}
+scores = scan('exam scores.dat',skip=1)
+df <- data.frame(scores)
+ndf <- df[order(scores),]
+df2 <- data.frame(ndf)
+```
+
+In this case Mu0 is 75.5, so if Zb is greater than 
+
+B = # number of scores above Mu0. B = 29
+
+Zb = (B-.5n)/(.25n)^.5. Zb = (29-20)/(10^.5) = 9/10^.5 = 2.846 which is greater than Zα(.05) so we rejetc the null hypothesis that Mu is equal to Mu0(75.5).
+
+# Question 3
+## Part a
+### T test
+
+Ho: μ = 75.5    Ha: μ >75.5
+
+```{r}
+result <- t.test(df2, mu = 75.5)
+
+test_statistic <- result$statistic
+
+p_value <- result$p.value
+
+test_statistic
+p_value
+```
+
+The test statistic is 3.146 and the p value is .00316. Since the p value is less than .05, we reject the reject the null hypothesis, meaning that there is evidence to suggest that the population mean is greater than 75.5.
+
+## Part b
+### Comment on any similarities and differences between this test and the binomial test from Problem 2
+
+Both tests had the same null and alternative hypothesis, where the objective was to find out whether the mean of 75.5 had been increased or not. Both tests gave us the same results, where we rejected the null hypothesis and concluded that the μ > 75.5. I can't think of any differences between the tests in this case besides the difference in completing the two tests.
+
+# Question 4
+## Part a
+### Find order statistics Xpaq and Xpbq such that pXpaq, Xpbqq is an approximate 95% confidence interval for the population median θ.5. Use the binomial distribution.Report the numeric values of your interval here as well.
+
+```{r}
+rainfall <- read.table("C:/Users/nicho/OneDrive - The Pennsylvania State University/Stat 464/Homework/rainfall.txt")
+
+rainfall <- rainfall %>% arrange(V1)
+```
+
+a = .5n - Zα/2(.25n^.5)    b = 1 + .5n + Zα/2(.25n^.5)    Zα/2 = 1.96    n = 34
+a = 17 - 1.96(8.5)^.5      b = 18 + 1.96(8.5)^.5  
+a = 17 - 5.71              b = 18 + 5.71
+a = 11.28 ~ 11             b = 23.71 ~ 24         95% CI for median = [X11, X24] = [25, 28.7]
+
+## Part b
+### Use the normal distribution (with 1/2-unit continuity correction) to find theapproximate confidence level of your interval in part (a) above
+
+In part a we get the interval [X11, X24] so now all we have to do is [Xa - 1/2, Xb +1/2] = 
+[X10.5, X24.5] ~ [X10, X25] = [24.8, 28.8]
+
+## Part c
+### Find an approximate 95% confidence interval for the 75th percentile
+
+a = .25n - Zα/2(n/16)^.5    b = 1 + .75n + Zα/2(3n/16)^.5    Zα/2 = 1.96    n = 34
+a = 8.5 - 1.96(2.125)^.5    b = 26.5 + 1.96(6.375)^.5  
+a = 5.64 ~ 6                b = 31.45 ~ 31
+95% CI for 75th percentile = [X6, X31] = [21.3, 33.1]
+
+## Part d
+### The confidence interval procedure assumes that the observations are independent and identically distributed. Do you think this is a reasonable assumption for the rainfall data? If not, what could cause this assumption to be invalid?
+
+If we assume the measurements are each yearly and are obtained independently of the others, meaning that the rainfall in one year does not depend on or influence the rainfall in other years, then the independence assumption is reasonable. However, if there are factors that introduce dependencies between consecutive years like climate patterns, trends, or cyclical variations, the independence assumption may be violated. Long-term changes in climate patterns could lead to non-identically distributed observations over the years. 
+
+# Question 5
+## Part a
+### What is the empirical cdf F(x)?
+
+F(1.7) = 1/8 = .125
+F(3.4) = 2/8 = .25
+F(4.5) = 3/8 = .375
+F(5.8) = 4/8 = .5
+F(6.7) = 5/8 = .625
+F(7.8) = 6/8 = .75
+F(9.1) = 7/8 = .825
+F(9.8) = 8/8 = 1
+
+## Part b
+### WWhat is meant by “75th percentile”? That is, state the relationship between θ.75 and F(x)
+
+The 75th percentile is the value below which 75% of the data falls. In terms of the cumulative distribution function F(x), it is the value θ0.75 where F(θ0.75) will be equal to .75. So in this case the value of θ0.75 would be 7.8.
+
+## Part c
+### Is the θ.75 greater than 8? Conduct a Hypothesis test.
+
+The θ.75 or 75th percentile is not greater than 8, because F(7.8) = .75. 
+
+Ho: θ.75 <= 8   Ha: θ.75 > 8
+
+## Part d
+### What is the confidence level for this interval? Use both the exact and normal approximation.
+
+95% confidence intervals
+
+Exact: [X5, X8] = [6.7, 9.8]
+
+Normal: CI = [xbar - Zα/2(sd), xbar + Zα/2(sd)]
+
+xbar = mean =~ 6.1     sd =~ 2.809     Zα/2 = 1.96
+
+CI = [6.1 - 1.96(2.809), 6.1 + 1.96(2.809)] = [0.594, 11.606]
+
+# Question 6
+### What is the probability of a Type I error? What is the power of the test?
+
+The probability of a Type 1 error is equivalent to the significance level (α) of the test since we are always rejecting the null hypothesis no matter what the data suggests.
+
+The power of a statistical test is the probability of correctly rejecting a false null hypothesis. A type 2 error occurs when we fail to reject the null hypothesis, but the alternative hypothesis was actually correct. Power is given by 1−β, where β is the probability of a Type II error, since we are never failing to reject the null hypothesis in this case, β = 0. So 1-β = 1. The power = 1.
+
+
+
+
+
+

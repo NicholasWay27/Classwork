@@ -1,0 +1,395 @@
+---
+title: "Stat 464 HW 5"
+author: "Nicholas Way"
+date: "2024-02-16"
+output: html_document
+---
+
+### Front Matter
+```{r}
+rm(list = ls())
+library(ggplot2)
+library(tidyverse)
+library(BSDA)
+library(haven)
+```
+
+# Question 1
+## Part a
+### One way F test
+
+Group 1 2.9736 0.9448 1.6394 0.0389 1.2958
+Group 2 0.7681 0.8027 0.2156 0.0740 1.5076
+Group 3 4.8249 2.2516 1.5609 2.0452 1.0959
+
+Group 1 Mean x1bar = 1.3785
+Group 2 Mean x2bar = 0.6736
+Group 3 Mean x3bar = 2.3557
+All Groups Mean xabar = 1.4692666666
+
+SST = n1(x1bar - xabar)^2 + n2(x1bar - xabar)^2 + n3(x1bar - xabar)^2
+    = 5(1.3785 - 1.4692666666)^2 + 5(.6736 - 1.4692666666)^2 + 5(2.3557 - 1.4692666666)^2
+    = 0.04119293882 + 3.16542722169 + 3.92882027281 = 7.13544043332
+    
+SSErr = Sum(x1j - x1bar)^2 + Sum(x2j - x2bar)^2 + Sum(x3j - x3bar)^2
+ = (2.9736 - 1.3785)^2 + (.9448 - 1.3785)^2 + (1.6394 - 1.3785)^2 + (.0389 - 1.3785)^2 + (1.2958 - 1.3785)^2 + (.7671 - .6736)^2 + (.8027 - .6736)^2 + (.2156 - .6736)^2 + (.0740 - .6736)^2 + (1.5076 - .6736)^2 + (4.8249 - 2.3557)^2 + (2.2516 - 2.3557)^2 + (1.5609 - 2.3557)^2 + (2.0452 - 2.3557)^2 + (1.0959 - 2.3557)^2
+ = 4.60187596 + 1.29024922 + 8.42299878 = 14.315
+    
+
+Fobs = MST/MSE = SSErr/(N−k)/(SST/(k−1)) = (14.315/12)/(7.13544043332/2) = 0.334, giving us a small f statistic, so a large p value that is > .05, so we fail to reject the null hypothesis. 
+
+
+## Part b
+### Permutation F test
+
+R = 3
+
+Group 1 2.9736 0.9448 1.6394 0.0389 1.0959
+Group 2 0.7681 0.8027 0.2156 0.0740 1.2958
+Group 3 4.8249 2.2516 1.5609 2.0452 1.5076
+
+Group 1 Mean x1bar = 1.33852
+Group 2 Mean x2bar = 0.63124
+Group 3 Mean x3bar = 2.43804
+All Groups Mean xabar = 1.46926666667
+
+SST = n1(x1bar - xabar)^2 + n2(x1bar - xabar)^2 + n3(x1bar - xabar)^2
+    = 5(1.33852 - 1.4692666666)^2 + 5(.63124 - 1.4692666666)^2 + 5(2.43804 - 1.4692666666)^2
+    = 8.28952578133
+    
+SSErr = Sum(x1j - x1bar)^2 + Sum(x2j - x2bar)^2 + Sum(x3j - x3bar)^2
+ = (2.9736 - 1.33852)^2 + (.9448 - 1.33852)^2 + (1.6394 - 1.33852)^2 + (.0389 - 1.33852)^2 + (1.0959 - 1.33852)^2 + (.7671 - 0.63124)^2 + (.8027 - 0.63124)^2 + (.2156 - 0.63124)^2 + (.0740 - 0.63124)^2 + (1.2958 - 0.63124)^2 + (4.8249 - 2.43804)^2 + (2.2516 - 2.43804)^2 + (1.5609 - 2.43804)^2 + (2.0452 - 2.43804)^2 + (1.5076 - 2.43804)^2
+ = 4.666907428 + 0.972769492 + 7.521276972 = 13.160953892
+    
+
+F = MST/MSE = SSErr/(N−k)/(SST/(k−1)) = (13.160953892/12)/(8.28952578133/2) = 0.2646
+
+Group 1 2.9736 0.9448 1.6394 2.0452 1.0959
+Group 2 0.7681 0.8027 0.2156 0.0389 1.2958
+Group 3 4.8249 2.2516 1.5609 0.0740 1.5076
+
+Group 1 Mean x1bar = 1.73978
+Group 2 Mean x2bar = 0.62422
+Group 3 Mean x3bar = 2.0438
+All Groups Mean xabar = 1.46926666667
+
+SST = n1(x1bar - xabar)^2 + n2(x1bar - xabar)^2 + n3(x1bar - xabar)^2
+    = 5(1.73978 - 1.4692666666)^2 + 5(0.62422 - 1.4692666666)^2 + 5(2.0438 - 1.4692666666)^2
+    = 5.58684941733
+    
+SSErr = Sum(x1j - x1bar)^2 + Sum(x2j - x2bar)^2 + Sum(x3j - x3bar)^2
+ = (2.9736 - 1.73978)^2 + (.9448 - 1.73978)^2 + (1.6394 - 1.73978)^2 + (2.0452 - 1.73978)^2 + (1.0959 - 1.73978)^2 + (.7671 - 0.62422)^2 + (.8027 - 0.62422)^2 + (.2156 - 0.62422)^2 + (.0389 - 0.62422)^2 + (1.2958 - 0.62422)^2 + (4.8249 - 2.0438)^2 + (2.2516 - 2.0438)^2 + (1.5609 - 2.0438)^2 + (.0740 - 2.0438)^2 + (1.5076 - 2.0438)^2
+ = 2.672243968 + 1.012859308 + 12.17851294 = 15.863616216
+    
+
+F = MST/MSE = SSErr/(N−k)/(SST/(k−1)) = (15.863616216/12)/(5.58684941733/2) = 0.4732
+
+Group 1 2.9736 0.9448 1.5609 2.0452 1.0959
+Group 2 0.7681 0.8027 1.6394 0.0389 1.2958
+Group 3 4.8249 2.2516 0.2156 0.0740 1.5076
+
+Group 1 Mean x1bar = 1.72408
+Group 2 Mean x2bar = 0.90898
+Group 3 Mean x3bar = 1.77474
+All Groups Mean xabar = 1.46926666667
+
+SST = n1(x1bar - xabar)^2 + n2(x1bar - xabar)^2 + n3(x1bar - xabar)^2
+    = 5(1.72408 - 1.4692666666)^2 + 5(0.90898 - 1.4692666666)^2 + 5(1.77474 - 1.4692666666)^2
+    = 2.36082470533
+    
+SSErr = Sum(x1j - x1bar)^2 + Sum(x2j - x2bar)^2 + Sum(x3j - x3bar)^2
+ = (2.9736 - 1.72408)^2 + (.9448 - 1.72408)^2 + (1.5609 - 1.72408)^2 + (2.0452 - 1.72408)^2 + (1.0959 - 1.72408)^2 + (.7671 - 0.90898)^2 + (.8027 - 0.90898)^2 + (1.6394 - 0.90898)^2 + (.0389 - 0.90898)^2 + (1.2958 - 0.90898)^2 + (4.8249 - 1.77474)^2 + (2.2516 - 1.77474)^2 + (0.2156 - 1.77474)^2 + (.0740 - 1.77474)^2 + (1.5076 - 1.77474)^2
+ = 2.692933428 + 1.471607668 + 14.925669352 = 19.090210448
+    
+
+F = MST/MSE = SSErr/(N−k)/(SST/(k−1)) = (19.090210448/12)/(2.36082470533/2) = 1.34770774558
+
+P value = # (Fstat >= F obs)/ R + 1 = 2/4 = .5 > .05 so we fail to reject the null hypothesis
+
+
+
+## Part c
+### Kruskal-Wallis test
+
+Group 1 2.9736 0.9448 1.6394 0.0389 1.2958
+Group 2 0.7681 0.8027 0.2156 0.0740 1.5076
+Group 3 4.8249 2.2516 1.5609 2.0452 1.0959
+
+N = 15
+
+Group 1R 14  6  11  1  8
+Group 2R 4   5  3   2  9
+Group 3R 15  13 10  12 7
+
+Group 1R Mean R1bar = 8
+Group 2R Mean R2bar = 4.6
+Group 3R Mean R3bar = 11.4
+
+KW = (12/N(N+1)) * sum of[i=1 to k] (ni(Ribar - (N+1)/2)^2)
+
+i=1, 5(8-(16/2))^2 = 0
+i=2, 5(4.6 -(16/2))^2 = 57.8
+i=3, 5(11.4 -(16/2))^2 = 57.8
+sum of [i=1 to k] = 0 + 57.8 + 57.8 = 115.6
+
+KW = 12/(15(16)) * 115.6 = 5.78
+
+KW ~ Chi^2(k-1)
+
+P value =~  .05557 > .05, therefore we fail top reject the null hypothesis
+
+## Part d
+### Compare tests
+
+The one-way ANOVA relies on assumptions of normality and similarity of variances, which may not hold in some datasets. The permutation F-test and the Kruskal-Wallis test are non-parametric and do not require these assumptions, making them more flexible.
+
+For this example of data points, all three tests had a p value that was not statistically significant and led to the failure to reject the null hypothesis.
+
+The high p-value from the permutation test suggests that the observed group differences might not be statistically significant, aligning with the ANOVA result under its specific assumptions,and the Kruskal-Wallis that test hints at distributional differences not captured by comparing means alone.
+
+The choice between these tests should consider the data's nature, the research question, and the assumptions each test makes. 
+
+
+# Question 2
+### Kruskal-Wallis
+
+```{r}
+x = read.table("C:/Users/nicho/OneDrive - The Pennsylvania State University/Stat 464/Homework/crash.dat", header=T, fill = TRUE)
+```
+
+```{r}
+kruskal_test_result <- kruskal.test(Head ~ injury, data = x)
+
+kruskal_test_result
+```
+ P value = .005 < .05, so we reject the null hypothesis, suggesting that there is a statistically significant difference in the median head injury readings across different vehicle types.
+
+# Question 3
+## Part a
+### Kruskal-Wallis Test
+
+H0: Mu1 = Mu2 = Mu3
+Ha: Mui > Muj
+
+Plant 1: 905, 1018, 905, 886, 958, 1056, 904, 856, 1070, 1006
+Plant 2: 1109, 1155, 835, 1152, 1036, 926, 1029, 1040, 959, 996
+Plant 3: 571, 1346, 292, 825, 676, 541, 818, 90, 2246, 104
+
+Ranks:
+
+Plant 1: 13.5, 20, 13.5, 11, 16, 24, 12, 9, 25, 19
+Plant 2: 26, 28, 10, 27, 22, 15, 21, 23, 17, 18
+Plant 3: 5, 29, 3, 8, 6, 4, 7, 1, 30, 2
+
+Rank Mean 1: 16.3
+Rank Mean 2: 20.7
+Rank Mean 3: 9.5
+
+KW = (12/N(N+1)) * sum of[i=1 to k] (ni(Ribar - (N+1)/2)^2)
+
+i=1, 10(16.3 -(31/2))^2 = 6.4
+i=2, 10(20.7 -(31/2))^2 = 270.4
+i=3, 10(9.5 -(31/2))^2 = 360
+sum of [i=1 to k] = 6.4 + 270.4 + 360 = 636.8
+
+KW = 12/(30(31)) * 636.8 = 8.21677419355
+
+KW ~ Chi^2(k-1)
+
+P value =~ .016435 < .05, therefore we reject the null hypothesis. The mean lives of bulbs produced at the three plants are not the same.
+
+
+## Part b
+### F Test
+
+H0: Mu1 = Mu2 = Mu3
+Ha: Mui > Muj
+
+N = 30, k = 3
+
+Plant 1: 905, 1018, 905, 886, 958, 1056, 904, 856, 1070, 1006
+Plant 2: 1109, 1155, 835, 1152, 1036, 926, 1029, 1040, 959, 996
+Plant 3: 571, 1346, 292, 825, 676, 541, 818, 90, 2246, 104
+
+Plant 1 Mean x1bar = 956.4
+Plant 2 Mean x2bar = 1023.7
+Plant 3 Mean x3bar = 750.9
+All Groups Mean xabar = 910.333333333
+
+SST = n1(x1bar - xabar)^2 + n2(x1bar - xabar)^2 + n3(x1bar - xabar)^2
+    = 10(956.4 - 910.333333333)^2 + 10(1023.7 - 910.333333333)^2 + 10(750.9 - 910.333333333)^2
+    = 21221.3777781 + 128520.011112 + 254189.877777 = 403931.266667
+    
+SSErr = Sum(x1j - x1bar)^2 + Sum(x2j - x2bar)^2 + Sum(x3j - x3bar)^2
+
+Sum(x1j - x1bar)^2 = (905 - 956.4)^2 + (1018 - 956.4)^2 + (905 - 956.4)^2 + (886 - 956.4)^2 + (958 - 956.4)^2 + (1056 - 956.4)^2 + (904 - 956.4)^2 + (856 - 956.4)^2 + (1070 - 956.4)^2 + (1006 - 956.4)^2 = 52148.4
+ 
+Sum(x2j - x2bar)^2 = (1109 - 1023.7)^2 + (1155 - 1023.7)^2 + (835 - 1023.7)^2 + (1152 - 1023.7)^2 + (1036 - 1023.7)^2 +  (926 - 1023.7)^2 + (1029 - 1023.7)^2 + (1040 - 1023.7)^2 + (959 - 1023.7)^2 + (996 - 1023.7)^2 = 91528.1
+ 
+Sum(x3j - x3bar)^2 = (571 - 750.9)^2 + (1346 - 750.9)^2 + (292 - 750.9)^2 + (825 - 750.9)^2 + (676 - 750.9)^2 + (541 - 750.9)^2 + (818 - 750.9)^2 + (90 - 750.9)^2 + (2246 - 750.9)^2 + (104 - 750.9)^2 = 3747350.9
+
+= 52148.4 + 91528.1 + 3747350.9 = 3891027.4
+    
+
+Fobs = MST/MSE = SSErr/(N−k)/(SST/(k−1)) = (3891027.4/27)/(403931.266667/2) = 0.714, giving us a small f statistic, so a large p value that is > .05, so we fail to reject the null hypothesis. The mean lives of bulbs produced at the three plants are the same.
+
+## Part c
+### Redo a after change
+
+(c) Change the observation 2246 in the third column to 1500 and redo part (a). How
+does this change affect the hypothesis test?
+
+H0: Mu1 = Mu2 = Mu3
+Ha: Mui > Muj
+
+Plant 1: 905, 1018, 905, 886, 958, 1056, 904, 856, 1070, 1006
+Plant 2: 1109, 1155, 835, 1152, 1036, 926, 1029, 1040, 959, 996
+Plant 3: 571, 1346, 292, 825, 676, 541, 818, 90, 1500, 104
+
+Ranks:
+
+Plant 1: 13.5, 20, 13.5, 11, 16, 24, 12, 9, 25, 19
+Plant 2: 26, 28, 10, 27, 22, 15, 21, 23, 17, 18
+Plant 3: 5, 29, 3, 8, 6, 4, 7, 1, 30, 2
+
+Rank Mean 1: 16.3
+Rank Mean 2: 20.7
+Rank Mean 3: 9.5
+
+KW = (12/N(N+1)) * sum of[i=1 to k] (ni(Ribar - (N+1)/2)^2)
+
+i=1, 10(16.3 -(31/2))^2 = 6.4
+i=2, 10(20.7 -(31/2))^2 = 270.4
+i=3, 10(9.5 -(31/2))^2 = 360
+sum of [i=1 to k] = 6.4 + 270.4 + 360 = 636.8
+
+KW = 12/(30(31)) * 636.8 = 8.21677419355
+
+KW ~ Chi^2(k-1)
+
+P value =~ .016435 < .05, therefore we reject the null hypothesis. The mean lives of bulbs produced at the three plants are not the same.
+
+This change of the value from 2246 to 1500 does not change the conclusion of the Kruskal-Wallis Test because both the values have the rank = 30 in our data set, so substituting one for the other has no real effect.
+
+## Part d
+### Redo b after change
+
+H0: Mu1 = Mu2 = Mu3
+Ha: Mui > Muj
+
+N = 30, k = 3
+
+Plant 1: 905, 1018, 905, 886, 958, 1056, 904, 856, 1070, 1006
+Plant 2: 1109, 1155, 835, 1152, 1036, 926, 1029, 1040, 959, 996
+Plant 3: 571, 1346, 292, 825, 676, 541, 818, 90, 1500, 104
+
+Plant 1 Mean x1bar = 956.4
+Plant 2 Mean x2bar = 1023.7
+Plant 3 Mean x3bar = 676.3
+All Groups Mean xabar = 885.466666667
+
+SST = n1(x1bar - xabar)^2 + n2(x1bar - xabar)^2 + n3(x1bar - xabar)^2
+    = 10(956.4 - 885.466666667)^2 + 10(1023.7 - 885.466666667)^2 + 10(676.3 - 885.466666667)^2
+    = 50315.3777773 + 191084.544444 + 437506.944446 = 678906.866667
+    
+SSErr = Sum(x1j - x1bar)^2 + Sum(x2j - x2bar)^2 + Sum(x3j - x3bar)^2
+
+Sum(x1j - x1bar)^2 = (905 - 956.4)^2 + (1018 - 956.4)^2 + (905 - 956.4)^2 + (886 - 956.4)^2 + (958 - 956.4)^2 + (1056 - 956.4)^2 + (904 - 956.4)^2 + (856 - 956.4)^2 + (1070 - 956.4)^2 + (1006 - 956.4)^2 = 52148.4
+ 
+Sum(x2j - x2bar)^2 = (1109 - 1023.7)^2 + (1155 - 1023.7)^2 + (835 - 1023.7)^2 + (1152 - 1023.7)^2 + (1036 - 1023.7)^2 +  (926 - 1023.7)^2 + (1029 - 1023.7)^2 + (1040 - 1023.7)^2 + (959 - 1023.7)^2 + (996 - 1023.7)^2 = 91528.1
+ 
+Sum(x3j - x3bar)^2 = (571 - 676.3)^2 + (1346 - 676.3)^2 + (292 - 676.3)^2 + (825 - 676.3)^2 + (676 - 676.3)^2 + (541 - 676.3)^2 + (818 - 676.3)^2 + (90 - 676.3)^2 + (1500 - 676.3)^2 + (104 - 676.3)^2 = 2017526.1
+
+= 52148.4 + 91528.1 + 2017526.1 = 2161202.6
+    
+Fobs = MST/MSE = SSErr/(N−k)/(SST/(k−1)) = (2161202.6/27)/(678906.866667/2) = 0.2358, giving us a small f statistic, so a large p value that is > .05, so we fail to reject the null hypothesis. The mean lives of bulbs produced at the three plants are the same.
+
+Changing the value from 2246 to 1500 did not change the outcome of our F test, as we still had a small statistic and large p value that led to failing to reject the null hypothesis.
+
+# Question 4
+### Show Kruskal-Wallis Written Statistic
+
+H = N(N+1)/12 * ∑(from j=1 to k): (2Rj/nj) - 3(N+1)
+
+This formula calculates the test statistic by comparing the rank sums across groups, adjusting for the number of observations. The Zj score formula provided is a standardized measure that quantifies how far the average rank of a group (Rj) deviates from the expected average rank under the null hypothesis. The denominator adjusts for the expected variance of ranks within a group, considering the total number of observations.
+
+To derive the alternative KW expression, we recognize that 2Zj measures the squared standardized deviation of group ranks from their expected values under the null hypothesis. The term (N+nj)/N adjusts for the relative size of each group within the total sample, ensuring the contribution of each group's 2Zj score is weighted appropriately.
+
+The transformation from H to KW using 2Zj involves recognizing that both forms aim to quantify the variance of ranks across groups. The 2Zj term encapsulates this variance in a standardized form, making it comparable across groups of different sizes. The multiplication by (N+nj)/N and summing across all groups then aggregates these standardized variances into a single statistic, KW, which serves a similar purpose to H but emphasizes the contribution of each group's variance relative to its size.
+
+# Question 5
+### Kruskal-Wallis Test
+
+H0: Mu1 = Mu2 = Mu3
+Ha: Mui > Muj
+
+Group 1: 45 45 40
+Group 2: 65 55 50
+Group 3: 75 90 85
+
+Ranks:
+
+Group 1: 2.5 2.5 1
+Group 2: 6 5 4
+Group 3: 7 9 8
+
+Rank Mean 1: 2
+Rank Mean 2: 5
+Rank Mean 3: 8.33333333333
+
+KW = (12/N(N+1)) * sum of[i=1 to k] (ni(Ribar - (N+1)/2)^2)
+
+i=1, 3(2 -(10/2))^2 = 27
+i=2, 3(5 -(10/2))^2 = 0
+i=3, 3(8.33333333333 -(10/2))^2 = 33.3333333333
+sum of [i=1 to k] = 27 + 0 + 33.3333333333 = 60.3333333333
+
+KW = 12/(9(10)) * 60.3333333333 = 8.04444444444
+
+KW ~ Chi^2(k-1)
+
+P value =~ .017914 < .05, therefore we reject the null hypothesis. The mean scores of the three groups are not the same.
+
+# Question 6
+### Kruskal-Wallis Test
+
+H0: Mu1 = Mu2 = Mu3
+Ha: Mui > Muj
+
+Group 1: 146 152 149 161 158 149 154
+Group 2: 150 144 148 155 154 150 148
+Group 3: 141 138 142 146 139 145 137
+
+Ranks:
+
+Group 1: 8.5 16 12.5 21 20 12.5 17.5
+Group 2: 14.5 6 10.5 19 17.5 14.5 10.5
+Group 3: 4 2 5 8.5 3 7 1
+
+Rank Mean 1: 15.4285714286
+Rank Mean 2: 13.2142857143
+Rank Mean 3: 4.35714285714
+
+KW = (12/N(N+1)) * sum of[i=1 to k] (ni(Ribar - (N+1)/2)^2)
+
+N = 21
+
+i=1, 7(15.4285714286 - (22/2))^2 = 137.285714287
+i=2, 7(13.2142857143 - (22/2))^2 = 34.3214285719
+i=3, 7(4.35714285714 - (22/2))^2 = 308.892857143
+sum of [i=1 to k] = 137.285714287 + 34.3214285719 + 308.892857143 = 480.500000002
+
+KW = 12/(21(22)) * 480.500000002 = 12.4805194806
+
+KW ~ Chi^2(k-1)
+
+P value =~ .00195 < .05, therefore we reject the null hypothesis. The mean scores of the three groups are not the same.
+
+
+
+
+
+
+
+
+

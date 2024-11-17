@@ -1,0 +1,218 @@
+---
+title: "HW 1 Stat 464"
+author: "Nicholas Way"
+date: "2024-01-13"
+output: html_document
+---
+
+### Front Matter
+```{r}
+rm(list = ls())
+library(ggplot2)
+library(tidyverse)
+```
+
+### Question 1
+## Part a
+# What’s the difference in output between the commands 2*1:5 and (2*1):5? Why is there a difference?
+
+```{r}
+x1 <- 2*1:5
+x2 <- (2*1):5
+x1
+x2
+```
+The code 2x1:5 displays a set of numbers from 2 to 10 that inscreases by 2 while the code (2x1):5 displays numbers 2 to 5 that increases by 1. This difference occurs because of the parentheses around the 2*1. The first sequence takes the numbers 1 to 5 and mupltiplies it by 2, the second sequence multiples 1 by 2 first, then puts the numbers in sequence from 2 to 5.
+
+## Part b
+# If you wanted to enter the odd numbers from 1 to 19 in the variable x, what command would you use?
+
+```{r}
+x <- seq(1, 19, by = 2)
+```
+
+I would use the 'seq' command.
+
+## Part c
+# If you create a variable using the following command y=c(-1,2,-3,4,-5), what command would put the positive values of y into the variable z?
+
+```{r}
+y <- c(-1,2,-3,4,-5)
+z <- y[y > 0]
+z
+```
+I would use the brackets and assignment operator in order to put all the positive values of y into z.
+
+## Part d
+# What R command would give you the 95th percentile for a chi-squared distribution with 10 degrees of freedom?
+
+```{r}
+qchisq(0.95, df = 10)
+```
+
+The R command that would give you the 95th percentile for a chi-squared distribution with 10 degrees of freedom uses the qchisq function to get "qchisq(0.95, df = 10)"
+
+## Part e
+# Generate a vector of 1000 standard normal random variables using the command x=rnorm(1000), use R to give a five number summary of your simulated data; what is the mean and variance of your x variable? Make and print a histogram for this data
+
+```{r}
+set.seed(123)
+xe <- rnorm(1000)
+
+summary(xe)
+
+mean_x <- mean(xe)
+var_x <- var(xe)
+mean_x
+var_x
+
+hist(x, main = "Histogram of Standard Normal Random Variables",
+     xlab = "Values", ylab = "Frequency", col = "blue")
+set.seed(NULL)
+```
+
+When using the seed 123, the mean for the 1000 standard normal random variables is 0.01612787, while the variance is 0.9834589.
+
+### Question 2
+## Part a
+# Do a two-sided t-test on... Derive the test statistic and its distribution, and state the decision rule at signif-icance level α
+
+In this situation, since, Mu and Sigma squared are unknown, we perform a t-test. t = (x-u0)/(s/n^.5). Where x is the sample mean, u0 is the hypothesized population mean under the null hypothesis, s is the sample standard deviation, and n is the sample size. The distribution of this test statistic under the null hypothesis is a t-distribution with n−1 degrees of freedom. The decision rule at significance level α is to reject the null hypothesis if the absolute value of the test statistic ∣t∣ is greater than the critical value from the t-distribution with n−1 degrees of freedom corresponding to α/2. This can be expressed by the equation |t| > t,α/2,n-1. Where if 
+∣t∣ is greater than the critical value, you reject the null hypothesis, on the other hand, you fail to reject it.
+
+## Part b
+# Using your results in (a), give a two-sided confidence interval for μ
+
+The confidence interval for μ is [x - (t,α/2,n-1 * (s/n^.5)), x + (t,α/2,n-1 * (s/n^.5))]. Where x is the sample mean, s is the sample standard deviation, t,α/2,n-1 is the critical value from the t-distribution with n−1 degrees of freedom corresponding to α/2, and n is the sample size. 
+
+### Question 3
+## Part a
+# What is P(X = k)? For what values of k is this nonzero?
+
+Here n = 5 and p = .25, and P(X = k) = (nk) * p^k * (1-p)^(n-k). Since p = .25, p^k will always be nonzero since .25^k will always be nonzero with any positive value of k. The same can be said for (1-p)^(n-k) since (1-.25)^(5-k) will be nonzero for any positive integer k as well. Therefore, P(X = k) is nonzero for all positive values of k from 0 to 5.
+
+## Part b
+# Find P(1 < x <= 4)
+
+P(1 < x <= 4) = P(x=2) + P(x=3) + P(x=4)
+
+P(1 < x <= 4) = (5,2) * (.25^2)(.75^3) + (5,3) * (.25^3)(.75^2) + (5,4) * (.25^4)(.75^1)
+
+P(1 < x <= 4) = 0.3662
+
+## Part c
+# Use the normal distribution to approximate the probability in part (b). Use a 1/2 unit correction for continuity
+
+The mean and standard deviation of a binomial distribution are given by:
+
+mean = np             sd = sqrt(np(1-p))
+
+For this question, n = 5 and p = 0.25, so we get:
+
+mean = 1.25           sd ~ .968
+
+With a 1/2 unit correction, P(1 < x <= 4) becomes P(1.5 < x <= 4.5). We know Z = (x-mean)/sd. So after filling in the two values of x (1.5 & 4.5), we get Z ~ .259 and Z ~ 3.356. Using the calculator we get an approximate probability of about .3977.
+
+```{r}
+n <- 5
+p <- 0.25
+mean_x <- n * p
+sd_x <- sqrt(n * p * (1 - p))
+
+x1 <- 1.5
+x2 <- 4.5
+
+Z1 <- (x1 - mean_x) / sd_x
+Z2 <- (x2 - mean_x) / sd_x
+
+Z1
+Z2
+
+# Probability using standard normal distribution
+prob_approx_with_correction <- pnorm(Z2) - pnorm(Z1)
+prob_approx_with_correction
+```
+
+### Question 4
+
+Here n = 4 and p = 1-.75 = .25, and P(X >= 2) = P(X=2) + P(X=3) + P(X=4)
+
+```{r}
+n <- 4
+p <- 0.25
+
+probtwo <- sum(dbinom(2:n, n, p))
+probtwo
+```
+
+The probability that she will have to replace at least two of the tires before reaching 30,000 miles i approximately .2617. The binomial distribution may not be a good model in this situation because the assumption of independence between tires may not be satisfied in real-world scenarios. Tires on the same vehicle are subject to similar driving conditions, road quality, and maintenance practices. If one tire fails, it may affect the likelihood of others failing. The dependencies between tires could make the binomial model less accurate, as well as their similar conditions experienced.
+
+### Question 5
+## Part a
+# With 95% confidence, what is the average height for all plants in the population?
+
+For a confidence interval we can calculate using the equation CI = [X - Z(s/n^.5),X + Z(s/n^.5)].
+Where X is the mean, Z is the critical value, s is the sampled standard deviation, and n is the sample size. In our situation x = 30.39, s = 2.47, n = 20, and with a 95% confidence interval, z = 1.96. 
+
+```{r}
+x <- 30.39
+s <- 2.47
+n <- 20
+z <- 1.96
+
+CI1 <- x - z*(s/sqrt(n))
+CI2 <- x + z*(s/sqrt(n))
+
+CI1
+CI2
+```
+
+With 95% confidence, the average height for all plants in the population is between 29.31 and 31.47 inches.
+
+## Part b
+# Is there significant evidence that the population mean has increased to 30 or more? Answer with an appropriate hypothesis test. Or, you may use your answer above.
+
+Null Hypothesis: Population mean (μ) is less than or equal to 30.
+Alternative Hypothesis: Population mean (μ) is greater than 30.
+
+```{r}
+null_mean <- 30
+
+# t-statistic calculation
+t_stat <- (x - null_mean) / (s / sqrt(n))
+
+# Degrees of freedom
+df <- n - 1
+
+# p-value for a one-tailed test
+p_value <- pt(t_stat, df)
+
+t_stat
+p_value
+```
+
+The p value is .755, so when using a significance level of .05, our p value is not significant. Therefore, we fail to reject the null hypothesis and our conclusion is that we don't have sufficient evidence to conclude that mean has increased to 30 or more.
+
+## Part c
+# What assumption are you making about the population distribution? Is it justified here?
+
+The assumption made is the normality of the population distribution. In the case of (a) and (b), it is assumed that the population is approximately normally distributed or the sample size is large enough for the Central Limit Theorem to apply. Since the sample size is pretty small and we used a t distribution the condition is that the population is normally distributed. However, when examining the histogram it is clear that it is not normally distributed, therefore the assumtion of normality is not justified. 
+
+### Question 6
+
+pmf for binomial -> P(X = k) = (nk) * p^k * (1-p)^(n-k) 
+
+mpf for poisson ->  P(X = k) = (e^-lamda)*(lamda^k)/k!
+
+n -> infinity, p -> 0, np = lamda < infinity
+
+(nk) = n(n-1)...(n-k+1) = (n^k)/k!
+
+p^k = (lamda/n)^k
+
+(1-p)^(n-k) = e^-lamda
+
+With the limits in action, (n^k)/k! * (lamda/n)^k * e^-lamda converges to (e^-lamda)*(lamda^k)/k!
+
+
+

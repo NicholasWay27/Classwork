@@ -1,0 +1,235 @@
+---
+title: "Stat 464 HW 6"
+author: "Nicholas Way"
+date: "2024-02-25"
+output: html_document
+---
+
+
+### Front Matter
+```{r}
+rm(list = ls())
+library(ggplot2)
+library(tidyverse)
+library(BSDA)
+library(haven)
+```
+
+I used chatgpt to help me write/give me ideas for some of the coding for the tests
+
+# Question 1
+## Part a
+### t tset
+
+```{r}
+x = read.table("C:/Users/nicho/OneDrive - The Pennsylvania State University/Stat 464/Homework/crash.dat", header=T, fill = TRUE)
+```
+
+```{r}
+# Convert 'injury' to a factor 
+x$injury <- factor(x$injury)
+```
+
+```{r}
+# Perform pairwise t-tests with Bonferroni adjustment
+pairwise_results <- pairwise.t.test(x$Head, x$injury,
+                                    p.adjust.method = "bonferroni")
+pairwise_results
+```
+
+According to the table, the two vehicle types 2 & 7 are considered significantly different. The two vehicle types 4 & 7 are considered significantly different. In both cases, the adjusted p value is less than .05. The rest of the pairs of vehicle types are not significantly different.
+
+## Part b
+### Wilcoxon rank sum test
+
+```{r}
+# Calculate the number of comparisons
+injury_types <- unique(x$injury)
+n <- length(injury_types)
+total_comparisons <- choose(n, 2)
+
+# Initialize a matrix or data frame to store the results
+results <- data.frame(Group1 = character(),
+                      Group2 = character(),
+                      PValue = numeric(),
+                      stringsAsFactors = FALSE)
+
+# Perform pairwise comparisons
+for(i in 1:(n-1)) {
+  for(j in (i+1):n) {
+    test_result <- wilcox.test(Head ~ injury,
+                               data = x %>% filter(injury %in% c(injury_types[i], injury_types[j])),
+                               exact = FALSE)
+    
+    # Append the results
+    results <- rbind(results, data.frame(Group1 = injury_types[i],
+                                         Group2 = injury_types[j],
+                                         PValue = test_result$p.value))
+  }
+}
+
+# Adjust for multiple comparisons using Bonferroni
+results$AdjustedPValue <- p.adjust(results$PValue, method = "bonferroni")
+
+results
+
+```
+
+According to the Wilcoxon rank-sum test, there are no pairs of vehicle types whose medians are significantly different. This is because there are no adjusted p values less thasn .05. 
+
+## Part c
+### two sample permutation
+
+```{r}
+# Define the permutation test function
+perm_test <- function(x1, x2, n.perm = 1000) {
+  # Combine the data
+  data_combined <- c(x1, x2)
+  
+  # Calculate the observed difference in means
+  obs_diff <- mean(x1) - mean(x2)
+  
+  # Initialize a vector to store permutation differences
+  perm_diffs <- numeric(n.perm)
+  
+  # Perform permutations
+  for (i in 1:n.perm) {
+    # Shuffle the data
+    shuffled <- sample(data_combined)
+    
+    # Split the data back into two groups, maintaining group sizes
+    perm_x1 <- shuffled[1:length(x1)]
+    perm_x2 <- shuffled[(length(x1) + 1):length(data_combined)]
+    
+    # Calculate and store the difference in means
+    perm_diffs[i] <- mean(perm_x1) - mean(perm_x2)
+  }
+  
+  # Calculate the p-value
+  p_value <- mean(abs(perm_diffs) >= abs(obs_diff))
+  
+  return(p_value)
+}
+
+# Perform pairwise permutation tests with Bonferroni adjustment
+# Get all unique pairs of vehicle types
+injury_types <- unique(x$injury)
+pairs <- combn(injury_types, 2, simplify = FALSE)
+
+# Initialize a data frame to store the results
+results <- data.frame(Group1 = integer(),
+                      Group2 = integer(),
+                      PValue = numeric(),
+                      stringsAsFactors = FALSE)
+
+# Perform the permutation tests
+for (pair in pairs) {
+  group1_data <- x$Head[x$injury == pair[1]]
+  group2_data <- x$Head[x$injury == pair[2]]
+  
+  p_value <- perm_test(group1_data, group2_data, n.perm = 1000)
+  
+  results <- rbind(results, data.frame(Group1 = pair[1],
+                                        Group2 = pair[2],
+                                        PValue = p_value))
+}
+
+# Adjust for multiple comparisons using Bonferroni
+results$AdjustedPValue <- p.adjust(results$PValue, method = "bonferroni")
+
+results
+```
+
+According to the two sample permutation tests, the vehicle types 2 & 5 are significantly different. The vehicle types 2 & 7 are significantly different. These pairs have a p value less than .05. All the other pairs have a p value greater than .05 and are not significantly different
+
+## Part d
+### Fishers protected LSD bas on observation
+
+```{r}
+anova_result <- aov(Head ~ injury, data = x)
+summary(anova_result)
+```
+
+anova gave us a significant p value less than .05, so now we proceed with Fishers test
+
+```{r}
+# Perform Fisher's Protected LSD
+lsd_results <- pairwise.t.test(x$Head, x$injury,
+                               p.adjust.method = "none", # No adjustment for multiple comparisons
+                               pool.sd = TRUE) # Assumes equal variances
+
+lsd_results
+```
+
+According to the Fishers protected LSD based on observations, the pair of vehicle types 2 & 5 are significantly different. The vehicle pairs of 4 & 5 are significantly different. The vehicle types 2 & 6 are significantly different. The vehicle types 1 & 7 are significantly different. The vehicle types 2 & 7 are significantly different. The vehicle types of 4 & 7 are significantly different. All these pairs I listed have a p value less than .05. The rest of the pairs of vehicle types are not significantly different.
+
+## Part e
+### Fishers protected LSD bas on rank
+
+```{r}
+# Rank transformation
+x$RankedHead <- rank(x$Head)
+
+# Kruskal-Wallis test
+kruskal_test <- kruskal.test(RankedHead ~ injury, data = x)
+
+kruskal_test
+```
+
+The Kruskal test is significant with a p value less than .05, so now we can do Fishers
+
+```{r}
+# Perform pairwise Wilcoxon tests (Mann-Whitney U test) without p-value adjustment
+pairwise_results <- pairwise.wilcox.test(x$Head, x$injury,
+                                         p.adjust.method = "none", # No adjustment
+                                         paired = FALSE)
+pairwise_results
+```
+
+
+According to the Fishers protected LSD based on ranks, the pair of vehicle types 2 & 3 are significantly different. The vehicle pairs of 2 & 5 are significantly different. The vehicle types 2 & 6 are significantly different. The vehicle types 4 & 5 are significantly different. The vehicle types 2 & 7 are significantly different. The vehicle types of 4 & 6 are significantly different. The vehicle types of 4 & 7 are significantly different. All these pairs I listed have a p value less than .05. The rest of the pairs of vehicle types are not significantly different.
+
+## Part f
+### Tukey's HSD based on observations
+
+```{r}
+anova_result <- aov(Head ~ injury, data = x)
+summary(anova_result)
+```
+
+anova gave us a significant p value less than .05, so now we proceed with Tukey test
+
+```{r}
+# Perform Tukey's HSD test
+tukey_result <- TukeyHSD(anova_result)
+tukey_result
+```
+
+According to the Tukey HSD test, the vehicle types 2 & 7 are significantly different. The vehicle types 4 & 7 are significantly different. These are the pairs with a p value less than .05. The rest of the pairs are not significantly different.
+
+## Part g
+### Tukey's HSD based on rank
+
+```{r}
+# Perform ANOVA on the ranked data
+anova_ranked <- aov(RankedHead ~ injury, data = x)
+summary(anova_ranked)
+```
+
+anova gave us a significant p value less than .05, so now we proceed with Tukey test
+
+```{r}
+# Tukey's HSD on the ranked data
+tukey_ranked <- TukeyHSD(anova_ranked)
+tukey_ranked
+```
+
+According to the Tukey HSD test, the vehicle types 2 & 5 are significantly different. The vehicle types 2 & 7 are significantly different. The vehicle types 4 & 7 are significantly different. These are the pairs with a p value less than .05. The rest of the pairs are not significantly different.
+
+
+
+
+
+
+
+
